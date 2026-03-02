@@ -1,224 +1,726 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>POLY·ARB SCANNER</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Barlow+Condensed:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<title>PolyArb — Arbitrage Scanner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  :root{
-    --bg:#040608;--surface:#07090c;--s2:#0c1016;
-    --b:#12191f;--bb:#1c2a35;
-    --g:#00ff88;--gd:rgba(0,255,136,.1);--gg:rgba(0,255,136,.35);
-    --am:#ffb700;--rd:#ff4055;--bl:#3db8ff;
-    --tx:#b8ccd8;--td:#3d5565;--mu:#253340;
-  }
-  html,body{min-height:100%;background:var(--bg);color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:13px}
-  body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
-    background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,255,136,.013) 3px,rgba(0,255,136,.013) 4px)}
-  .shell{max-width:1480px;margin:0 auto;padding:20px 24px}
+/* ─── TOKENS ──────────────────────────────────────────────────────────────── */
+:root {
+  --radius: 4px;
+  --transition: 180ms ease;
 
-  .hdr{display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid var(--bb);margin-bottom:20px;flex-wrap:wrap;gap:12px}
-  .logo-row{display:flex;align-items:baseline;gap:14px}
-  .logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:2.1rem;letter-spacing:.08em;color:var(--g);text-shadow:0 0 20px var(--gg),0 0 60px rgba(0,255,136,.1)}
-  .tagline{font-size:.58rem;letter-spacing:.2em;color:var(--td);text-transform:uppercase}
-  .hdr-r{display:flex;align-items:center;gap:18px}
-  .live{display:flex;align-items:center;gap:6px;font-size:.58rem;letter-spacing:.15em;color:var(--g)}
-  .dot{width:7px;height:7px;border-radius:50%;background:var(--g);box-shadow:0 0 8px var(--g);animation:blink 1.5s ease-in-out infinite}
-  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-  .ts{font-size:.57rem;color:var(--td)}
+  /* brand */
+  --green:     #26a69a;
+  --green-bg:  rgba(38,166,154,.12);
+  --green-dim: rgba(38,166,154,.06);
+  --red:       #ef5350;
+  --red-bg:    rgba(239,83,80,.1);
+  --amber:     #f59e0b;
+  --blue:      #3b82f6;
 
-  .exp{background:linear-gradient(135deg,rgba(0,255,136,.05),rgba(0,255,136,.02));border:1px solid rgba(0,255,136,.18);
-    padding:14px 18px;margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
-  @media(max-width:680px){.exp{grid-template-columns:1fr}}
-  .ex{font-size:.62rem;line-height:1.85;color:var(--td)}
-  .ex strong{color:var(--g);font-size:.67rem;display:block;margin-bottom:3px;letter-spacing:.1em}
-  .ex .f{color:var(--am);font-size:.63rem}
+  /* typography scale */
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
 
-  .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--b);border:1px solid var(--b);margin-bottom:20px}
-  @media(max-width:780px){.stats{grid-template-columns:repeat(3,1fr)}}
-  .st{background:var(--surface);padding:12px 16px}
-  .stl{font-size:.54rem;letter-spacing:.18em;text-transform:uppercase;color:var(--td);margin-bottom:5px}
-  .stv{font-size:1.35rem;font-weight:700;color:var(--g);line-height:1}
-  .stv.a{color:var(--am)}.stv.b{color:var(--bl)}
+/* DARK */
+[data-theme="dark"] {
+  --bg:         #131722;
+  --bg-panel:   #1e222d;
+  --bg-hover:   #262b38;
+  --bg-input:   #2a2f3e;
+  --border:     #2a2f3e;
+  --border-mid: #363c4e;
+  --text-1:     #d1d4dc;
+  --text-2:     #787b86;
+  --text-3:     #4c525e;
+  --shadow:     0 1px 3px rgba(0,0,0,.4);
+}
 
-  .ctrl{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-  .fw{display:flex;align-items:center;gap:8px}
-  .cl{font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--td)}
-  input[type=number]{background:var(--s2);border:1px solid var(--bb);color:var(--g);
-    font-family:inherit;font-size:.73rem;padding:5px 8px;width:60px;text-align:right;outline:none}
-  input[type=number]:focus{border-color:var(--g);box-shadow:0 0 10px rgba(0,255,136,.18)}
-  .btn{background:transparent;border:1px solid var(--bb);color:var(--tx);
-    font-family:inherit;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;
-    padding:6px 13px;cursor:pointer;transition:.14s;white-space:nowrap}
-  .btn:hover,.btn.on{border-color:var(--g);color:var(--g);background:var(--gd)}
-  .btn:disabled{opacity:.35;cursor:not-allowed}
-  .sep{color:var(--mu);font-size:.8rem}
-  .nt{font-size:.57rem;color:var(--td);margin-left:auto}
+/* LIGHT */
+[data-theme="light"] {
+  --bg:         #f0f3fa;
+  --bg-panel:   #ffffff;
+  --bg-hover:   #f4f6fb;
+  --bg-input:   #edf0f7;
+  --border:     #e1e4ed;
+  --border-mid: #cdd0db;
+  --text-1:     #131722;
+  --text-2:     #5d6170;
+  --text-3:     #9598a1;
+  --shadow:     0 1px 3px rgba(0,0,0,.08);
+}
 
-  .tw{overflow-x:auto}
-  table{width:100%;border-collapse:collapse}
-  thead th{background:var(--surface);padding:9px 13px;text-align:left;font-size:.54rem;
-    letter-spacing:.18em;text-transform:uppercase;color:var(--td);border-bottom:1px solid var(--bb);
-    cursor:pointer;white-space:nowrap;user-select:none}
-  thead th:hover{color:var(--g)}
-  thead th.asc::after{content:' ↑';color:var(--g)}
-  thead th.desc::after{content:' ↓';color:var(--g)}
-  tbody tr{border-bottom:1px solid var(--b);transition:background .1s}
-  tbody tr:hover{background:rgba(0,255,136,.03)}
-  td{padding:10px 13px;vertical-align:middle}
+/* ─── RESET ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text-1);
+  min-height: 100vh;
+  line-height: 1.5;
+  transition: background var(--transition), color var(--transition);
+  -webkit-font-smoothing: antialiased;
+}
 
-  .rk{color:var(--td);font-size:.58rem;width:26px;text-align:right}
-  .mq{font-size:.67rem;color:var(--tx);line-height:1.45}
-  .mq a{color:inherit;text-decoration:none}.mq a:hover{color:var(--g)}
+/* ─── LAYOUT ──────────────────────────────────────────────────────────────── */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
 
-  .ty{color:#44ffaa;font-weight:500}
-  .tn{color:#ff9955;font-weight:500}
-  .tc{color:var(--td)}
-  .pf{font-weight:600}
-  .pos{color:var(--g)}.neg{color:var(--rd)}
+/* ─── TOPBAR ─────────────────────────────────────────────────────────────── */
+.topbar {
+  height: 52px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow);
+}
 
-  .apy{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.04em}
-  .ah{color:var(--g);text-shadow:0 0 12px rgba(0,255,136,.6)}
-  .amc{color:var(--am)}.al{color:var(--td)}.an{color:var(--rd);font-size:.75rem}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.brand-mark {
+  width: 28px; height: 28px;
+  background: var(--green);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+}
+.brand-mark svg { width: 16px; height: 16px; fill: #fff; }
+.brand-name {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: .95rem;
+  letter-spacing: -.01em;
+  color: var(--text-1);
+}
+.brand-tag {
+  font-size: .72rem;
+  color: var(--text-3);
+  font-weight: 400;
+  letter-spacing: .02em;
+}
 
-  .dd{color:var(--td);font-size:.67rem}
-  .dv{color:var(--bl);font-size:.63rem}
+.topbar-center { flex: 1; display: flex; align-items: center; gap: 6px; }
 
-  .conf{width:68px;height:3px;background:var(--bb);border-radius:2px;overflow:hidden}
-  .cf{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--g),var(--am))}
+.status-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: .72rem;
+  font-weight: 500;
+  letter-spacing: .02em;
+  border: 1px solid transparent;
+  transition: all var(--transition);
+}
+.status-pill.live   { color: var(--green); background: var(--green-dim); border-color: rgba(38,166,154,.2); }
+.status-pill.error  { color: var(--red);   background: var(--red-bg);    border-color: rgba(239,83,80,.2); }
+.status-pill.loading{ color: var(--text-2);background: var(--bg-input);  border-color: var(--border); }
 
-  .badge{display:inline-block;font-size:.49rem;letter-spacing:.12em;text-transform:uppercase;
-    padding:2px 6px;border-radius:2px;font-weight:600;white-space:nowrap}
-  .ba{background:rgba(0,255,136,.14);color:var(--g);border:1px solid rgba(0,255,136,.28)}
-  .bm{background:rgba(255,64,85,.1);color:var(--rd);border:1px solid rgba(255,64,85,.22)}
+.status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor;
+}
+.status-pill.live .status-dot { animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
 
-  .sbox{text-align:center;padding:60px 20px;font-size:.72rem;color:var(--td)}
-  .spin{display:inline-block;width:14px;height:14px;border:2px solid var(--bb);border-top-color:var(--g);
-    border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .etxt{color:var(--rd);font-size:.78rem}
-  .stxt{font-size:.62rem;color:var(--td);margin-top:10px;line-height:1.8}
+.status-time { font-size: .68rem; color: var(--text-3); font-family: var(--font-mono); }
 
-  footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--b);font-size:.55rem;color:var(--td);line-height:2.1}
-  footer b{color:var(--mu)}
-  footer code{color:var(--am)}
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+
+/* Theme toggle */
+.theme-toggle {
+  width: 36px; height: 20px;
+  background: var(--border-mid);
+  border-radius: 10px;
+  position: relative;
+  cursor: pointer;
+  border: none;
+  transition: background var(--transition);
+  flex-shrink: 0;
+}
+.theme-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform var(--transition);
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+[data-theme="light"] .theme-toggle::after { transform: translateX(16px); }
+[data-theme="light"] .theme-toggle { background: var(--green); }
+
+.icon-btn {
+  width: 32px; height: 32px;
+  border: 1px solid var(--border);
+  background: transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-2);
+  transition: all var(--transition);
+  font-size: .8rem;
+}
+.icon-btn:hover { background: var(--bg-hover); color: var(--text-1); border-color: var(--border-mid); }
+
+.theme-label { font-size: .7rem; color: var(--text-3); }
+
+/* ─── TOOLBAR ────────────────────────────────────────────────────────────── */
+.toolbar {
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 44px;
+  flex-wrap: wrap;
+}
+
+.toolbar-group { display: flex; align-items: center; gap: 4px; }
+.toolbar-divider { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+/* Tab-style filter buttons */
+.filter-btn {
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: .75rem;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  letter-spacing: .01em;
+}
+.filter-btn:hover { background: var(--bg-hover); color: var(--text-1); }
+.filter-btn.active {
+  background: var(--green-bg);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+/* Fee input */
+.fee-group { display: flex; align-items: center; gap: 8px; }
+.fee-label { font-size: .75rem; color: var(--text-2); white-space: nowrap; }
+.fee-input-wrap { position: relative; }
+.fee-input {
+  width: 68px;
+  height: 28px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: .8rem;
+  font-weight: 500;
+  color: var(--text-1);
+  text-align: right;
+  padding: 0 22px 0 8px;
+  outline: none;
+  transition: border-color var(--transition);
+}
+.fee-input:focus { border-color: var(--green); }
+.fee-unit {
+  position: absolute; right: 7px; top: 50%;
+  transform: translateY(-50%);
+  font-size: .7rem; color: var(--text-3);
+  pointer-events: none;
+  font-family: var(--font-mono);
+}
+
+.refresh-btn {
+  height: 28px;
+  padding: 0 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: .75rem;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: all var(--transition);
+}
+.refresh-btn:hover { background: var(--bg-hover); color: var(--text-1); }
+.refresh-btn:disabled { opacity: .4; cursor: not-allowed; }
+.refresh-btn svg { width: 12px; height: 12px; transition: transform .5s ease; }
+.refresh-btn.spinning svg { animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.toolbar-right { margin-left: auto; font-size: .72rem; color: var(--text-3); font-family: var(--font-mono); }
+
+/* ─── STATS ROW ──────────────────────────────────────────────────────────── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel);
+}
+@media (max-width: 900px) { .stats-row { grid-template-columns: repeat(3,1fr); } }
+@media (max-width: 500px) { .stats-row { grid-template-columns: repeat(2,1fr); } }
+
+.stat-card {
+  padding: 14px 20px;
+  border-right: 1px solid var(--border);
+  transition: background var(--transition);
+}
+.stat-card:last-child { border-right: none; }
+.stat-card:hover { background: var(--bg-hover); }
+
+.stat-label {
+  font-size: .68rem;
+  font-weight: 500;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 5px;
+}
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-1);
+  line-height: 1;
+}
+.stat-value.green { color: var(--green); }
+.stat-value.amber { color: var(--amber); }
+.stat-value.blue  { color: var(--blue); }
+.stat-sub {
+  font-size: .68rem;
+  color: var(--text-3);
+  margin-top: 3px;
+  font-family: var(--font-mono);
+}
+
+/* ─── MAIN TABLE AREA ────────────────────────────────────────────────────── */
+.main { flex: 1; overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; min-width: 900px; }
+
+thead {
+  position: sticky;
+  top: 96px; /* topbar + toolbar height */
+  z-index: 10;
+}
+thead tr {
+  background: var(--bg-panel);
+  border-bottom: 2px solid var(--border-mid);
+}
+
+th {
+  padding: 10px 16px;
+  text-align: left;
+  font-size: .68rem;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: color var(--transition);
+}
+th:hover { color: var(--text-1); }
+th.sort-active { color: var(--text-1); }
+th .sort-icon { margin-left: 4px; opacity: .5; }
+th.sort-active .sort-icon { opacity: 1; color: var(--green); }
+
+/* number columns right-align */
+th.num, td.num { text-align: right; }
+
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+}
+tbody tr:hover { background: var(--bg-hover); }
+
+td {
+  padding: 11px 16px;
+  font-size: .82rem;
+  vertical-align: middle;
+}
+
+/* rank */
+.td-rank {
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  color: var(--text-3);
+  width: 36px;
+  text-align: right;
+}
+
+/* market name */
+.td-market { max-width: 320px; }
+.market-q {
+  font-size: .82rem;
+  font-weight: 400;
+  color: var(--text-1);
+  line-height: 1.4;
+}
+.market-q a { color: inherit; text-decoration: none; }
+.market-q a:hover { color: var(--green); }
+
+/* prices */
+.price-yes { font-family: var(--font-mono); font-weight: 500; color: var(--green); }
+.price-no  { font-family: var(--font-mono); font-weight: 500; color: var(--red); }
+.price-cost{ font-family: var(--font-mono); color: var(--text-2); }
+
+/* profit */
+.profit-pos { font-family: var(--font-mono); font-weight: 600; color: var(--green); }
+.profit-neg { font-family: var(--font-mono); font-weight: 500; color: var(--text-3); }
+
+/* APY — the hero column */
+.apy-cell {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: .9rem;
+  white-space: nowrap;
+}
+.apy-high   { color: var(--green); }
+.apy-mid    { color: var(--amber); }
+.apy-low    { color: var(--text-2); }
+.apy-none   { color: var(--text-3); }
+.apy-neg    { color: var(--red); }
+
+.td-days  { font-family: var(--font-mono); font-size: .78rem; color: var(--text-2); }
+.td-vol   { font-family: var(--font-mono); font-size: .78rem; color: var(--blue); }
+
+/* status badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .03em;
+  white-space: nowrap;
+}
+.badge-arb  { background: var(--green-bg); color: var(--green); }
+.badge-miss { background: transparent; color: var(--text-3); border: 1px solid var(--border); }
+
+/* edge bar */
+.edge-bar { width: 60px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.edge-fill { height: 100%; border-radius: 2px; background: var(--green); transition: width .3s ease; }
+
+/* ─── EMPTY / STATUS ─────────────────────────────────────────────────────── */
+.table-status {
+  text-align: center;
+  padding: 80px 24px;
+  color: var(--text-3);
+}
+.table-status .icon { font-size: 1.5rem; margin-bottom: 12px; }
+.table-status .msg  { font-size: .85rem; color: var(--text-2); margin-bottom: 6px; }
+.table-status .sub  { font-size: .75rem; color: var(--text-3); }
+
+.spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid var(--border-mid);
+  border-top-color: var(--green);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+/* ─── FOOTER ─────────────────────────────────────────────────────────────── */
+footer {
+  background: var(--bg-panel);
+  border-top: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.footer-item {
+  font-size: .7rem;
+  color: var(--text-3);
+  display: flex;
+  gap: 6px;
+}
+.footer-item b { color: var(--text-2); font-weight: 500; }
+
+/* ─── FORMULA PANEL ─────────────────────────────────────────────────────── */
+.formula-bar {
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.formula-block { min-width: 180px; }
+.formula-title {
+  font-size: .68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--text-3);
+  margin-bottom: 6px;
+}
+.formula-line {
+  font-family: var(--font-mono);
+  font-size: .75rem;
+  color: var(--text-2);
+  line-height: 1.7;
+}
+.formula-line .hl { color: var(--green); font-weight: 500; }
+.formula-line .hl-a { color: var(--amber); font-weight: 500; }
+
 </style>
 </head>
 <body>
-<div class="shell">
+<div class="app">
 
-  <div class="hdr">
-    <div class="logo-row">
-      <div class="logo">POLY·ARB</div>
-      <div class="tagline">Live Arbitrage Scanner // Polymarket</div>
+  <!-- ── TOPBAR ── -->
+  <header class="topbar">
+    <a class="brand" href="#">
+      <div class="brand-mark">
+        <svg viewBox="0 0 16 16"><path d="M3 13 L8 3 L13 13 M5.5 9.5 L10.5 9.5" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+      </div>
+      <span class="brand-name">PolyArb</span>
+      <span class="brand-tag">Arbitrage Scanner</span>
+    </a>
+
+    <div class="topbar-center">
+      <div class="status-pill loading" id="status-pill">
+        <span class="status-dot"></span>
+        <span id="status-text">Connecting</span>
+      </div>
+      <span class="status-time" id="status-time"></span>
     </div>
-    <div class="hdr-r">
-      <div class="live"><div class="dot"></div><span id="live-label">CONNECTING</span></div>
-      <div class="ts" id="ts">—</div>
+
+    <div class="topbar-right">
+      <span class="theme-label" id="theme-label">Dark</span>
+      <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle theme"></button>
+    </div>
+  </header>
+
+  <!-- ── FORMULA BAR ── -->
+  <div class="formula-bar" id="formula-bar">
+    <div class="formula-block">
+      <div class="formula-title">Core Logic</div>
+      <div class="formula-line">Buy <span class="hl">YES</span> + <span class="hl">NO</span> of the same market.</div>
+      <div class="formula-line">One must resolve to <span class="hl">$1.00</span>.</div>
+      <div class="formula-line">Arb exists when <span class="hl">Cost &lt; $1.00</span>.</div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-title">Calculation</div>
+      <div class="formula-line">Cost = YES×(1+fee) + NO×(1+fee)</div>
+      <div class="formula-line">Profit = <span class="hl">$1.00 − Cost</span></div>
+      <div class="formula-line">APY = (Profit/Cost) × (365/days)</div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-title">Example  <span style="font-weight:400;color:var(--text-3)">(fee = 2%)</span></div>
+      <div class="formula-line">YES=48¢, NO=49¢ → Cost = <span class="hl-a">98.94¢</span></div>
+      <div class="formula-line">Profit = <span class="hl">+1.06¢  (+1.07%)</span></div>
+      <div class="formula-line">30-day market → APY ≈ <span class="hl">+13.0%</span></div>
+    </div>
+    <div style="margin-left:auto;align-self:center;">
+      <button onclick="document.getElementById('formula-bar').style.display='none'"
+        style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:.75rem;font-family:var(--font-body);">
+        Hide ✕
+      </button>
     </div>
   </div>
 
-  <div class="exp">
-    <div class="ex">
-      <strong>💡 Core Idea</strong>
-      Buy YES + NO shares of the <em>same market</em>.<br>
-      Exactly one resolves to $1.00.<br>
-      If total cost &lt; $1.00 → <b style="color:var(--g)">guaranteed profit</b> regardless of outcome.
+  <!-- ── STATS ROW ── -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Markets Scanned</div>
+      <div class="stat-value blue" id="s-total">—</div>
     </div>
-    <div class="ex">
-      <strong>🧮 Formula</strong>
-      <div class="f">Cost = YES×(1+fee) + NO×(1+fee)</div>
-      <div class="f">Profit = $1.00 − Cost</div>
-      <div class="f">Profit% = Profit / Cost × 100</div>
-      <div class="f">APY = Profit% × (365 / days left)</div>
-      Arb exists when <b style="color:var(--g)">Cost &lt; $1.00</b>
+    <div class="stat-card">
+      <div class="stat-label">Arb Opportunities</div>
+      <div class="stat-value green" id="s-arb">—</div>
     </div>
-    <div class="ex">
-      <strong>⚡ Example</strong>
-      YES = 48¢, NO = 49¢, fee = 2% per side<br>
-      Cost = 0.48×1.02 + 0.49×1.02 = <b style="color:var(--am)">98.94¢</b><br>
-      Profit = 100 − 98.94 = <b style="color:var(--g)">+1.06¢ (+1.07%)</b><br>
-      30-day market → APY ≈ <b style="color:var(--g)">+13.0%</b>
+    <div class="stat-card">
+      <div class="stat-label">Best APY</div>
+      <div class="stat-value green" id="s-best">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Profit</div>
+      <div class="stat-value amber" id="s-avg">—</div>
+      <div class="stat-sub" id="s-avg-sub">per arb opportunity</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Edge</div>
+      <div class="stat-value amber" id="s-edge">—</div>
+      <div class="stat-sub">sum of all profits</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Fee per Side</div>
+      <div class="stat-value" id="s-fee">2.00%</div>
     </div>
   </div>
 
-  <div class="stats">
-    <div class="st"><div class="stl">Scanned</div><div class="stv b" id="s-total">—</div></div>
-    <div class="st"><div class="stl">Arb Ops</div><div class="stv" id="s-arb">—</div></div>
-    <div class="st"><div class="stl">Best APY</div><div class="stv" id="s-best">—</div></div>
-    <div class="st"><div class="stl">Avg Profit</div><div class="stv a" id="s-avg">—</div></div>
-    <div class="st"><div class="stl">Total Edge $</div><div class="stv a" id="s-edge">—</div></div>
-    <div class="st"><div class="stl">Fee / Side</div><div class="stv a" id="s-fee">2.0%</div></div>
-  </div>
-
-  <div class="ctrl">
-    <div class="fw">
-      <span class="cl">Fee %</span>
-      <input type="number" id="fee" value="2" min="0" max="20" step="0.1">
-      <span class="cl">per side</span>
+  <!-- ── TOOLBAR ── -->
+  <div class="toolbar">
+    <div class="toolbar-group">
+      <button class="filter-btn" id="btn-all"  onclick="setFilter('all')">All Markets</button>
+      <button class="filter-btn active" id="btn-arb"  onclick="setFilter('arb')">Arb Only</button>
+      <button class="filter-btn" id="btn-near" onclick="setFilter('near')">Near-Miss <span style="opacity:.6">&lt;1¢</span></button>
     </div>
-    <span class="sep">|</span>
-    <button class="btn" id="btn-all"  onclick="setFilter('all')">All</button>
-    <button class="btn on" id="btn-arb" onclick="setFilter('arb')">Arb Only</button>
-    <button class="btn" id="btn-near" onclick="setFilter('near')">Near-Miss (&lt;1¢)</button>
-    <span class="sep">|</span>
-    <button class="btn" id="btn-refresh" onclick="loadAll()">↻ Refresh</button>
-    <div class="nt" id="note">—</div>
+
+    <div class="toolbar-divider"></div>
+
+    <div class="fee-group">
+      <span class="fee-label">Taker Fee</span>
+      <div class="fee-input-wrap">
+        <input type="number" class="fee-input" id="fee" value="2" min="0" max="20" step="0.1">
+        <span class="fee-unit">%</span>
+      </div>
+      <span class="fee-label">per side</span>
+    </div>
+
+    <div class="toolbar-divider"></div>
+
+    <button class="refresh-btn" id="refresh-btn" onclick="loadAll()">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <path d="M10.5 2.5A5 5 0 1 0 11 6.5"/>
+        <path d="M10.5 2.5V5.5H7.5"/>
+      </svg>
+      Refresh
+    </button>
+
+    <div class="toolbar-right" id="toolbar-note">—</div>
   </div>
 
-  <div class="tw">
+  <!-- ── TABLE ── -->
+  <div class="main">
     <table>
       <thead>
         <tr>
-          <th class="rk">#</th>
-          <th id="h-question" onclick="sortBy('question')">Market</th>
-          <th id="h-yes"       onclick="sortBy('yes')">YES</th>
-          <th id="h-no"        onclick="sortBy('no')">NO</th>
-          <th id="h-cost"      onclick="sortBy('cost')">Total Cost</th>
-          <th id="h-profit"    onclick="sortBy('profit')">Profit ¢</th>
-          <th id="h-profitPct" onclick="sortBy('profitPct')">Profit %</th>
-          <th id="h-apy"       onclick="sortBy('apy')" class="desc">APY ↓</th>
-          <th id="h-days"      onclick="sortBy('days')">Days Left</th>
-          <th id="h-volume"    onclick="sortBy('volume')">Volume</th>
+          <th class="td-rank">#</th>
+          <th id="h-question" onclick="sortBy('question')">
+            Market <span class="sort-icon">↕</span>
+          </th>
+          <th class="num" id="h-yes" onclick="sortBy('yes')">
+            YES <span class="sort-icon">↕</span>
+          </th>
+          <th class="num" id="h-no" onclick="sortBy('no')">
+            NO <span class="sort-icon">↕</span>
+          </th>
+          <th class="num" id="h-cost" onclick="sortBy('cost')">
+            Total Cost <span class="sort-icon">↕</span>
+          </th>
+          <th class="num" id="h-profit" onclick="sortBy('profit')">
+            Profit ¢ <span class="sort-icon">↕</span>
+          </th>
+          <th class="num" id="h-profitPct" onclick="sortBy('profitPct')">
+            Profit % <span class="sort-icon">↕</span>
+          </th>
+          <th class="num sort-active" id="h-apy" onclick="sortBy('apy')">
+            APY <span class="sort-icon">↓</span>
+          </th>
+          <th class="num" id="h-days" onclick="sortBy('days')">
+            Days <span class="sort-icon">↕</span>
+          </th>
+          <th class="num" id="h-volume" onclick="sortBy('volume')">
+            Volume <span class="sort-icon">↕</span>
+          </th>
           <th>Status</th>
           <th>Edge</th>
         </tr>
       </thead>
       <tbody id="tbody">
-        <tr><td colspan="12" class="sbox"><span class="spin"></span>Loading markets…</td></tr>
+        <tr>
+          <td colspan="12">
+            <div class="table-status">
+              <div class="msg"><span class="spinner"></span>Loading markets from Polymarket…</div>
+            </div>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
 
+  <!-- ── FOOTER ── -->
   <footer>
-    <b>LOGIC</b> — Cost=(YES+NO)×(1+fee_per_side) · Profit=$1.00−Cost · APY annualizes by days to resolution<br>
-    <b>RISKS</b> — Slippage & partial fills can kill edge. Execute both legs simultaneously.<br>
-    <b>DATA</b> — Live via <code>/api/markets</code> (Vercel serverless → Polymarket Gamma API). Auto-refreshes every 60s.
+    <div class="footer-item"><b>Logic:</b> Cost=(YES+NO)×(1+fee) · Profit=$1−Cost · APY=Profit%×(365/days)</div>
+    <div class="footer-item"><b>Risk:</b> Execute both legs simultaneously — slippage can eliminate edge</div>
+    <div class="footer-item"><b>Data:</b> Polymarket Gamma API via /api/markets · auto-refresh 60s</div>
   </footer>
-</div>
+
+</div><!-- .app -->
 
 <script>
-const LIMIT = 500;
-const MAX_PAGES = 4;
+// ── STATE ──────────────────────────────────────────────────────────────────
+const LIMIT = 500, MAX_PAGES = 4;
 let raw = [], computed = [], cf = 'arb', _sc = 'apy', _sd = -1;
 let refreshTimer = null;
 
+// ── THEME ─────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+  html.dataset.theme = next;
+  document.getElementById('theme-label').textContent = next === 'dark' ? 'Dark' : 'Light';
+  localStorage.setItem('polyarb-theme', next);
+}
+(function initTheme() {
+  const saved = localStorage.getItem('polyarb-theme');
+  if (saved) {
+    document.documentElement.dataset.theme = saved;
+    document.getElementById('theme-label').textContent = saved === 'dark' ? 'Dark' : 'Light';
+  }
+})();
+
+// ── UTILS ─────────────────────────────────────────────────────────────────
 function getFee() { return Math.max(0, parseFloat(document.getElementById('fee').value) || 0) / 100; }
 
+function fmtVol(v) {
+  if (!v) return '—';
+  if (v >= 1e6) return '$' + (v/1e6).toFixed(1) + 'M';
+  if (v >= 1e3) return '$' + (v/1e3).toFixed(0) + 'K';
+  return '$' + v.toFixed(0);
+}
+
+function setStatusPill(state, text) {
+  const pill = document.getElementById('status-pill');
+  pill.className = 'status-pill ' + state;
+  document.getElementById('status-text').textContent = text;
+}
+
+function setStatusTime(text) {
+  document.getElementById('status-time').textContent = text;
+}
+
+// ── FETCH ─────────────────────────────────────────────────────────────────
 async function loadAll() {
-  const btn = document.getElementById('btn-refresh');
+  const btn = document.getElementById('refresh-btn');
   btn.disabled = true;
-  document.getElementById('live-label').textContent = 'LOADING';
-  setStatus('<span class="spin"></span>Fetching markets from Polymarket…');
+  btn.classList.add('spinning');
+  setStatusPill('loading', 'Loading');
+  setTableStatus('<span class="spinner"></span> Fetching markets from Polymarket…');
   if (refreshTimer) clearTimeout(refreshTimer);
 
   try {
     let all = [];
     for (let page = 0; page < MAX_PAGES; page++) {
       const offset = page * LIMIT;
-      setStatus(`<span class="spin"></span>Page ${page+1} of ${MAX_PAGES}… (${all.length} markets)`);
+      setTableStatus(`<span class="spinner"></span> Page ${page+1} of ${MAX_PAGES} &nbsp;·&nbsp; ${all.length} markets loaded`);
       const res = await fetch(`/api/markets?limit=${LIMIT}&offset=${offset}`);
       if (!res.ok) throw new Error(`Server error ${res.status}`);
       const data = await res.json();
@@ -231,23 +733,30 @@ async function loadAll() {
     raw = all;
     compute();
     render();
-    document.getElementById('ts').textContent = 'Updated ' + new Date().toLocaleTimeString();
-    document.getElementById('live-label').textContent = 'LIVE';
+    setStatusPill('live', 'Live');
+    setStatusTime('Updated ' + new Date().toLocaleTimeString());
     refreshTimer = setTimeout(loadAll, 60000);
-  } catch (e) {
-    setStatus(`<div class="etxt">⚠ ${e.message}</div><div class="stxt">Check Vercel function logs at <code>vercel logs</code> for details.</div>`);
-    document.getElementById('live-label').textContent = 'ERROR';
+  } catch(e) {
+    setTableStatus(`
+      <div class="icon">⚠</div>
+      <div class="msg">${e.message}</div>
+      <div class="sub">Check Vercel function logs for details.</div>
+    `);
+    setStatusPill('error', 'Error');
   }
+
   btn.disabled = false;
+  btn.classList.remove('spinning');
 }
 
-function setStatus(html) {
-  document.getElementById('tbody').innerHTML = `<tr><td colspan="12" class="sbox">${html}</td></tr>`;
+function setTableStatus(html) {
+  document.getElementById('tbody').innerHTML =
+    `<tr><td colspan="12"><div class="table-status">${html}</div></td></tr>`;
 }
 
+// ── COMPUTE ───────────────────────────────────────────────────────────────
 function compute() {
-  const f = getFee();
-  const now = Date.now();
+  const f = getFee(), now = Date.now();
   computed = raw.map(m => {
     let yes = null, no = null;
     try {
@@ -260,11 +769,10 @@ function compute() {
         no  = parseFloat(prices[ni !== -1 ? ni : 1]);
       }
     } catch(e) {}
-    if (!yes || !no || isNaN(yes) || isNaN(no)) return null;
-    if (yes <= 0 || no <= 0 || yes >= 1 || no >= 1) return null;
+    if (!yes || !no || isNaN(yes) || isNaN(no) || yes <= 0 || no <= 0 || yes >= 1 || no >= 1) return null;
 
-    const cost      = yes * (1 + f) + no * (1 + f);
-    const profit    = 1 - cost;
+    const cost = yes * (1+f) + no * (1+f);
+    const profit = 1 - cost;
     const profitPct = (profit / cost) * 100;
     let days = null;
     if (m.endDate) days = Math.max((new Date(m.endDate) - now) / 86400000, 0.1);
@@ -274,22 +782,34 @@ function compute() {
       question: m.question || '—', slug: m.slug || '',
       yes, no, cost, profit, profitPct, apy, days,
       volume: parseFloat(m.volume || 0),
-      isArb: profit > 0, isNear: profit <= 0 && profit > -0.01,
+      isArb:  profit > 0,
+      isNear: profit <= 0 && profit > -0.01,
     };
   }).filter(Boolean);
 }
 
+// ── FILTER + SORT + RENDER ────────────────────────────────────────────────
 function setFilter(f) {
   cf = f;
-  ['all','arb','near'].forEach(k => document.getElementById('btn-'+k).classList.toggle('on', k===f));
+  ['all','arb','near'].forEach(k =>
+    document.getElementById('btn-'+k).classList.toggle('active', k === f)
+  );
   render();
 }
 
 function sortBy(col) {
   if (_sc === col) _sd *= -1; else { _sc = col; _sd = -1; }
-  document.querySelectorAll('thead th').forEach(th => th.className = '');
-  const h = document.getElementById('h-'+col);
-  if (h) h.className = _sd === 1 ? 'asc' : 'desc';
+  document.querySelectorAll('thead th').forEach(th => {
+    th.classList.remove('sort-active');
+    const icon = th.querySelector('.sort-icon');
+    if (icon) icon.textContent = '↕';
+  });
+  const h = document.getElementById('h-' + col);
+  if (h) {
+    h.classList.add('sort-active');
+    const icon = h.querySelector('.sort-icon');
+    if (icon) icon.textContent = _sd === 1 ? '↑' : '↓';
+  }
   render();
 }
 
@@ -297,6 +817,7 @@ function render() {
   let rows = computed;
   if (cf === 'arb')  rows = rows.filter(r => r.isArb);
   if (cf === 'near') rows = rows.filter(r => r.isNear);
+
   rows = [...rows].sort((a, b) => {
     let av = a[_sc], bv = b[_sc];
     if (av == null && bv == null) return 0;
@@ -305,66 +826,60 @@ function render() {
     return (av - bv) * _sd;
   });
 
-  const nl = {
-    all:  `All ${computed.length} valid binary markets`,
-    arb:  `${computed.filter(r=>r.isArb).length} arb opportunities`,
-    near: `${computed.filter(r=>r.isNear).length} near-miss markets (within 1¢)`,
-  };
-  document.getElementById('note').textContent = nl[cf];
+  const counts = { all: computed.length, arb: computed.filter(r=>r.isArb).length, near: computed.filter(r=>r.isNear).length };
+  const labels = { all:`${counts.all} markets`, arb:`${counts.arb} arb opportunities`, near:`${counts.near} near-miss markets` };
+  document.getElementById('toolbar-note').textContent = labels[cf];
 
   const tbody = document.getElementById('tbody');
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="12" class="sbox">No markets match this filter.</td></tr>`;
+    setTableStatus('<div class="msg">No markets match this filter.</div>');
     updateStats(); return;
   }
 
   tbody.innerHTML = rows.map((r, i) => {
-    const ac  = !r.apy?'al':r.apy>80?'ah':r.apy>20?'amc':r.apy>0?'al':'an';
-    const as  = r.apy != null ? (r.apy>0?'+':'')+r.apy.toFixed(1)+'%' : '—';
-    const ps  = r.profit >= 0 ? '+' : '';
-    const pc  = r.profit >= 0 ? 'pos' : 'neg';
-    const badge = r.isArb ? `<span class="badge ba">ARB ✓</span>` : `<span class="badge bm">MISS ${(r.profit*100).toFixed(2)}¢</span>`;
-    const cp  = r.isArb ? Math.min(100, r.profitPct * 6) : 0;
-    const link = r.slug ? `https://polymarket.com/event/${r.slug}` : '#';
+    const apyCls = !r.apy ? 'apy-none' : r.apy > 100 ? 'apy-high' : r.apy > 30 ? 'apy-high' : r.apy > 10 ? 'apy-mid' : r.apy > 0 ? 'apy-low' : 'apy-neg';
+    const apyStr = r.apy != null ? (r.apy > 0 ? '+' : '') + r.apy.toFixed(1) + '%' : '—';
+    const pCls   = r.profit >= 0 ? 'profit-pos' : 'profit-neg';
+    const pSign  = r.profit >= 0 ? '+' : '';
+    const badge  = r.isArb
+      ? `<span class="badge badge-arb">✓ Arb</span>`
+      : `<span class="badge badge-miss">${(r.profit*100).toFixed(2)}¢ miss</span>`;
+    const edgePct = r.isArb ? Math.min(100, r.profitPct * 8) : 0;
+    const link   = r.slug ? `https://polymarket.com/event/${r.slug}` : '#';
+
     return `<tr>
-      <td class="rk">${i+1}</td>
-      <td><div class="mq"><a href="${link}" target="_blank" rel="noopener">${r.question}</a></div></td>
-      <td class="ty">${(r.yes*100).toFixed(1)}¢</td>
-      <td class="tn">${(r.no*100).toFixed(1)}¢</td>
-      <td class="tc">${(r.cost*100).toFixed(2)}¢</td>
-      <td class="pf ${pc}">${ps}${(r.profit*100).toFixed(2)}¢</td>
-      <td class="pf ${pc}">${ps}${r.profitPct.toFixed(3)}%</td>
-      <td class="apy ${ac}">${as}</td>
-      <td class="dd">${r.days!=null?r.days.toFixed(0)+'d':'—'}</td>
-      <td class="dv">${fv(r.volume)}</td>
+      <td class="td-rank">${i + 1}</td>
+      <td class="td-market"><div class="market-q"><a href="${link}" target="_blank" rel="noopener">${r.question}</a></div></td>
+      <td class="num price-yes">${(r.yes*100).toFixed(1)}¢</td>
+      <td class="num price-no">${(r.no*100).toFixed(1)}¢</td>
+      <td class="num price-cost">${(r.cost*100).toFixed(2)}¢</td>
+      <td class="num ${pCls}">${pSign}${(r.profit*100).toFixed(2)}¢</td>
+      <td class="num ${pCls}">${pSign}${r.profitPct.toFixed(3)}%</td>
+      <td class="num apy-cell ${apyCls}">${apyStr}</td>
+      <td class="num td-days">${r.days != null ? r.days.toFixed(0)+'d' : '—'}</td>
+      <td class="num td-vol">${fmtVol(r.volume)}</td>
       <td>${badge}</td>
-      <td><div class="conf"><div class="cf" style="width:${cp}%"></div></div></td>
+      <td><div class="edge-bar"><div class="edge-fill" style="width:${edgePct}%"></div></div></td>
     </tr>`;
   }).join('');
+
   updateStats();
 }
 
 function updateStats() {
-  document.getElementById('s-fee').textContent   = (getFee()*100).toFixed(1)+'%';
-  document.getElementById('s-total').textContent = computed.length;
-  const arb = computed.filter(r=>r.isArb);
-  document.getElementById('s-arb').textContent   = arb.length;
+  document.getElementById('s-fee').textContent   = (getFee()*100).toFixed(2) + '%';
+  document.getElementById('s-total').textContent = computed.length || '—';
+  const arb = computed.filter(r => r.isArb);
+  document.getElementById('s-arb').textContent   = arb.length || '—';
   const best = arb.length ? Math.max(...arb.filter(r=>r.apy!=null).map(r=>r.apy)) : null;
-  document.getElementById('s-best').textContent  = best!=null?'+'+best.toFixed(1)+'%':'—';
+  document.getElementById('s-best').textContent  = best != null ? '+' + best.toFixed(1) + '%' : '—';
   const avg = arb.length ? arb.reduce((s,r)=>s+r.profitPct,0)/arb.length : null;
-  document.getElementById('s-avg').textContent   = avg!=null?'+'+avg.toFixed(3)+'%':'—';
+  document.getElementById('s-avg').textContent   = avg != null ? '+' + avg.toFixed(3) + '%' : '—';
   const edge = arb.reduce((s,r)=>s+r.profit,0);
-  document.getElementById('s-edge').textContent  = arb.length?'$'+edge.toFixed(2):'—';
+  document.getElementById('s-edge').textContent  = arb.length ? '$' + edge.toFixed(2) : '—';
 }
 
-function fv(v) {
-  if (!v) return '—';
-  if (v>=1e6) return '$'+(v/1e6).toFixed(1)+'M';
-  if (v>=1e3) return '$'+(v/1e3).toFixed(0)+'K';
-  return '$'+v;
-}
-
-document.getElementById('fee').addEventListener('input', ()=>{ compute(); render(); });
+document.getElementById('fee').addEventListener('input', () => { compute(); render(); });
 loadAll();
 </script>
 </body>
