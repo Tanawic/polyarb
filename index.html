@@ -7,12 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ─── TOKENS ──────────────────────────────────────────────────────────────── */
 :root {
   --radius: 4px;
   --transition: 180ms ease;
-
-  /* brand */
   --green:     #26a69a;
   --green-bg:  rgba(38,166,154,.12);
   --green-dim: rgba(38,166,154,.06);
@@ -20,13 +17,9 @@
   --red-bg:    rgba(239,83,80,.1);
   --amber:     #f59e0b;
   --blue:      #3b82f6;
-
-  /* typography scale */
   --font-body: 'IBM Plex Sans', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
 }
-
-/* DARK */
 [data-theme="dark"] {
   --bg:         #131722;
   --bg-panel:   #1e222d;
@@ -39,8 +32,6 @@
   --text-3:     #4c525e;
   --shadow:     0 1px 3px rgba(0,0,0,.4);
 }
-
-/* LIGHT */
 [data-theme="light"] {
   --bg:         #f0f3fa;
   --bg-panel:   #ffffff;
@@ -54,7 +45,6 @@
   --shadow:     0 1px 3px rgba(0,0,0,.08);
 }
 
-/* ─── RESET ──────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 14px; }
 body {
@@ -67,10 +57,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ─── LAYOUT ──────────────────────────────────────────────────────────────── */
 .app { display: flex; flex-direction: column; min-height: 100vh; }
 
-/* ─── TOPBAR ─────────────────────────────────────────────────────────────── */
+/* TOPBAR */
 .topbar {
   height: 52px;
   background: var(--bg-panel);
@@ -78,204 +67,77 @@ body {
   display: flex;
   align-items: center;
   padding: 0 24px;
-  gap: 20px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  gap: 16px;
+  position: sticky; top: 0; z-index: 100;
   box-shadow: var(--shadow);
 }
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-}
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 .brand-mark {
   width: 28px; height: 28px;
-  background: var(--green);
-  border-radius: 6px;
+  background: var(--green); border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
 }
-.brand-mark svg { width: 16px; height: 16px; fill: #fff; }
-.brand-name {
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: .95rem;
-  letter-spacing: -.01em;
-  color: var(--text-1);
-}
-.brand-tag {
-  font-size: .72rem;
-  color: var(--text-3);
-  font-weight: 400;
-  letter-spacing: .02em;
-}
-
-.topbar-center { flex: 1; display: flex; align-items: center; gap: 6px; }
-
+.brand-mark svg { width: 16px; height: 16px; }
+.brand-name { font-family: var(--font-mono); font-weight: 600; font-size: .95rem; letter-spacing: -.01em; color: var(--text-1); }
+.brand-tag  { font-size: .72rem; color: var(--text-3); }
+.topbar-mid { flex: 1; display: flex; align-items: center; gap: 8px; }
 .status-pill {
-  display: flex; align-items: center; gap: 6px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: .72rem;
-  font-weight: 500;
-  letter-spacing: .02em;
-  border: 1px solid transparent;
+  display: flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: .72rem; font-weight: 500; border: 1px solid transparent;
   transition: all var(--transition);
 }
-.status-pill.live   { color: var(--green); background: var(--green-dim); border-color: rgba(38,166,154,.2); }
-.status-pill.error  { color: var(--red);   background: var(--red-bg);    border-color: rgba(239,83,80,.2); }
-.status-pill.loading{ color: var(--text-2);background: var(--bg-input);  border-color: var(--border); }
-
-.status-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: currentColor;
-}
-.status-pill.live .status-dot { animation: pulse 2s ease-in-out infinite; }
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
-
-.status-time { font-size: .68rem; color: var(--text-3); font-family: var(--font-mono); }
+.status-pill.live    { color: var(--green); background: var(--green-dim); border-color: rgba(38,166,154,.25); }
+.status-pill.error   { color: var(--red);   background: var(--red-bg);    border-color: rgba(239,83,80,.25); }
+.status-pill.loading { color: var(--text-2);background: var(--bg-input);  border-color: var(--border); }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.status-pill.live .status-dot { animation: blink 2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.status-ts { font-family: var(--font-mono); font-size: .68rem; color: var(--text-3); }
 
 .topbar-right { display: flex; align-items: center; gap: 8px; }
-
-/* Theme toggle */
+.theme-label { font-size: .72rem; color: var(--text-3); }
 .theme-toggle {
-  width: 36px; height: 20px;
-  background: var(--border-mid);
-  border-radius: 10px;
-  position: relative;
-  cursor: pointer;
-  border: none;
+  width: 36px; height: 20px; background: var(--border-mid);
+  border-radius: 10px; position: relative; cursor: pointer; border: none;
   transition: background var(--transition);
-  flex-shrink: 0;
 }
 .theme-toggle::after {
-  content: '';
-  position: absolute;
-  top: 2px; left: 2px;
-  width: 16px; height: 16px;
-  border-radius: 50%;
-  background: #fff;
-  transition: transform var(--transition);
-  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; border-radius: 50%; background: #fff;
+  transition: transform var(--transition); box-shadow: 0 1px 3px rgba(0,0,0,.2);
 }
 [data-theme="light"] .theme-toggle::after { transform: translateX(16px); }
 [data-theme="light"] .theme-toggle { background: var(--green); }
 
-.icon-btn {
-  width: 32px; height: 32px;
-  border: 1px solid var(--border);
-  background: transparent;
-  border-radius: var(--radius);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--text-2);
-  transition: all var(--transition);
-  font-size: .8rem;
-}
-.icon-btn:hover { background: var(--bg-hover); color: var(--text-1); border-color: var(--border-mid); }
-
-.theme-label { font-size: .7rem; color: var(--text-3); }
-
-/* ─── TOOLBAR ────────────────────────────────────────────────────────────── */
-.toolbar {
+/* FORMULA BAR */
+.formula-bar {
   background: var(--bg-panel);
   border-bottom: 1px solid var(--border);
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  height: 44px;
-  flex-wrap: wrap;
+  padding: 10px 24px;
+  display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start;
 }
-
-.toolbar-group { display: flex; align-items: center; gap: 4px; }
-.toolbar-divider { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
-
-/* Tab-style filter buttons */
-.filter-btn {
-  height: 28px;
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  background: transparent;
-  border-radius: var(--radius);
-  font-family: var(--font-body);
-  font-size: .75rem;
-  font-weight: 500;
-  color: var(--text-2);
-  cursor: pointer;
-  transition: all var(--transition);
-  white-space: nowrap;
-  letter-spacing: .01em;
-}
-.filter-btn:hover { background: var(--bg-hover); color: var(--text-1); }
-.filter-btn.active {
-  background: var(--green-bg);
-  border-color: var(--green);
-  color: var(--green);
-}
-
-/* Fee input */
-.fee-group { display: flex; align-items: center; gap: 8px; }
-.fee-label { font-size: .75rem; color: var(--text-2); white-space: nowrap; }
-.fee-input-wrap { position: relative; }
-.fee-input {
-  width: 68px;
-  height: 28px;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-family: var(--font-mono);
-  font-size: .8rem;
-  font-weight: 500;
-  color: var(--text-1);
-  text-align: right;
-  padding: 0 22px 0 8px;
-  outline: none;
-  transition: border-color var(--transition);
-}
-.fee-input:focus { border-color: var(--green); }
-.fee-unit {
-  position: absolute; right: 7px; top: 50%;
-  transform: translateY(-50%);
-  font-size: .7rem; color: var(--text-3);
-  pointer-events: none;
-  font-family: var(--font-mono);
-}
-
-.refresh-btn {
-  height: 28px;
-  padding: 0 12px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-family: var(--font-body);
-  font-size: .75rem;
-  font-weight: 500;
-  color: var(--text-2);
-  cursor: pointer;
-  display: flex; align-items: center; gap: 6px;
+.formula-block { min-width: 180px; }
+.formula-title { font-size: .67rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--text-3); margin-bottom: 5px; }
+.formula-line  { font-family: var(--font-mono); font-size: .73rem; color: var(--text-2); line-height: 1.75; }
+.hl  { color: var(--green); font-weight: 500; }
+.hla { color: var(--amber); font-weight: 500; }
+.formula-close {
+  margin-left: auto; align-self: center;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-3); font-size: .75rem; font-family: var(--font-body);
+  padding: 4px 8px; border-radius: var(--radius);
   transition: all var(--transition);
 }
-.refresh-btn:hover { background: var(--bg-hover); color: var(--text-1); }
-.refresh-btn:disabled { opacity: .4; cursor: not-allowed; }
-.refresh-btn svg { width: 12px; height: 12px; transition: transform .5s ease; }
-.refresh-btn.spinning svg { animation: spin .7s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+.formula-close:hover { background: var(--bg-hover); color: var(--text-1); }
 
-.toolbar-right { margin-left: auto; font-size: .72rem; color: var(--text-3); font-family: var(--font-mono); }
-
-/* ─── STATS ROW ──────────────────────────────────────────────────────────── */
+/* STATS ROW */
 .stats-row {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  display: grid; grid-template-columns: repeat(6,1fr);
   border-bottom: 1px solid var(--border);
   background: var(--bg-panel);
 }
-@media (max-width: 900px) { .stats-row { grid-template-columns: repeat(3,1fr); } }
-@media (max-width: 500px) { .stats-row { grid-template-columns: repeat(2,1fr); } }
-
+@media(max-width:900px){.stats-row{grid-template-columns:repeat(3,1fr)}}
 .stat-card {
   padding: 14px 20px;
   border-right: 1px solid var(--border);
@@ -283,395 +145,244 @@ body {
 }
 .stat-card:last-child { border-right: none; }
 .stat-card:hover { background: var(--bg-hover); }
-
-.stat-label {
-  font-size: .68rem;
-  font-weight: 500;
-  color: var(--text-3);
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  margin-bottom: 5px;
-}
-.stat-value {
-  font-family: var(--font-mono);
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-1);
-  line-height: 1;
-}
+.stat-label { font-size: .67rem; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+.stat-value { font-family: var(--font-mono); font-size: 1.25rem; font-weight: 600; color: var(--text-1); line-height: 1; }
 .stat-value.green { color: var(--green); }
 .stat-value.amber { color: var(--amber); }
 .stat-value.blue  { color: var(--blue); }
-.stat-sub {
-  font-size: .68rem;
-  color: var(--text-3);
-  margin-top: 3px;
-  font-family: var(--font-mono);
-}
+.stat-sub { font-size: .67rem; color: var(--text-3); margin-top: 3px; font-family: var(--font-mono); }
 
-/* ─── MAIN TABLE AREA ────────────────────────────────────────────────────── */
+/* TOOLBAR */
+.toolbar {
+  background: var(--bg-panel); border-bottom: 1px solid var(--border);
+  padding: 0 24px; display: flex; align-items: center;
+  gap: 8px; height: 44px; flex-wrap: wrap;
+}
+.toolbar-group { display: flex; align-items: center; gap: 4px; }
+.divider { width: 1px; height: 20px; background: var(--border); margin: 0 6px; }
+.filter-btn {
+  height: 28px; padding: 0 12px;
+  border: 1px solid var(--border); background: transparent;
+  border-radius: var(--radius); font-family: var(--font-body);
+  font-size: .75rem; font-weight: 500; color: var(--text-2);
+  cursor: pointer; transition: all var(--transition); white-space: nowrap;
+}
+.filter-btn:hover { background: var(--bg-hover); color: var(--text-1); }
+.filter-btn.active { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+.fee-group { display: flex; align-items: center; gap: 8px; }
+.fee-label { font-size: .75rem; color: var(--text-2); white-space: nowrap; }
+.fee-wrap { position: relative; }
+.fee-input {
+  width: 68px; height: 28px;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius); font-family: var(--font-mono);
+  font-size: .8rem; font-weight: 500; color: var(--text-1);
+  text-align: right; padding: 0 22px 0 8px; outline: none;
+  transition: border-color var(--transition);
+}
+.fee-input:focus { border-color: var(--green); }
+.fee-unit { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); font-size: .7rem; color: var(--text-3); pointer-events: none; font-family: var(--font-mono); }
+.refresh-btn {
+  height: 28px; padding: 0 12px; background: transparent;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  font-family: var(--font-body); font-size: .75rem; font-weight: 500;
+  color: var(--text-2); cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: all var(--transition);
+}
+.refresh-btn:hover { background: var(--bg-hover); color: var(--text-1); }
+.refresh-btn:disabled { opacity: .4; cursor: not-allowed; }
+.refresh-btn svg { width: 12px; height: 12px; }
+.refresh-btn.spinning svg { animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.toolbar-note { margin-left: auto; font-size: .72rem; color: var(--text-3); font-family: var(--font-mono); }
+
+/* TABLE */
 .main { flex: 1; overflow-x: auto; }
-
 table { width: 100%; border-collapse: collapse; min-width: 900px; }
-
-thead {
-  position: sticky;
-  top: 96px; /* topbar + toolbar height */
-  z-index: 10;
-}
-thead tr {
-  background: var(--bg-panel);
-  border-bottom: 2px solid var(--border-mid);
-}
-
+thead { position: sticky; top: 96px; z-index: 10; }
+thead tr { background: var(--bg-panel); border-bottom: 2px solid var(--border-mid); }
 th {
-  padding: 10px 16px;
-  text-align: left;
-  font-size: .68rem;
-  font-weight: 600;
-  color: var(--text-3);
-  text-transform: uppercase;
-  letter-spacing: .07em;
-  cursor: pointer;
-  white-space: nowrap;
-  user-select: none;
+  padding: 10px 16px; text-align: left;
+  font-size: .67rem; font-weight: 600; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: .07em;
+  cursor: pointer; white-space: nowrap; user-select: none;
   transition: color var(--transition);
 }
 th:hover { color: var(--text-1); }
 th.sort-active { color: var(--text-1); }
-th .sort-icon { margin-left: 4px; opacity: .5; }
-th.sort-active .sort-icon { opacity: 1; color: var(--green); }
-
-/* number columns right-align */
+th .si { margin-left: 3px; opacity: .4; font-size: .65rem; }
+th.sort-active .si { opacity: 1; color: var(--green); }
 th.num, td.num { text-align: right; }
-
-tbody tr {
-  border-bottom: 1px solid var(--border);
-  transition: background var(--transition);
-}
+tbody tr { border-bottom: 1px solid var(--border); transition: background var(--transition); }
 tbody tr:hover { background: var(--bg-hover); }
-
-td {
-  padding: 11px 16px;
-  font-size: .82rem;
-  vertical-align: middle;
-}
-
-/* rank */
-.td-rank {
-  font-family: var(--font-mono);
-  font-size: .7rem;
-  color: var(--text-3);
-  width: 36px;
-  text-align: right;
-}
-
-/* market name */
+td { padding: 11px 16px; font-size: .82rem; vertical-align: middle; }
+.td-rank { font-family: var(--font-mono); font-size: .7rem; color: var(--text-3); width: 36px; text-align: right; }
 .td-market { max-width: 320px; }
-.market-q {
-  font-size: .82rem;
-  font-weight: 400;
-  color: var(--text-1);
-  line-height: 1.4;
-}
-.market-q a { color: inherit; text-decoration: none; }
-.market-q a:hover { color: var(--green); }
-
-/* prices */
-.price-yes { font-family: var(--font-mono); font-weight: 500; color: var(--green); }
-.price-no  { font-family: var(--font-mono); font-weight: 500; color: var(--red); }
-.price-cost{ font-family: var(--font-mono); color: var(--text-2); }
-
-/* profit */
+.mq { font-size: .82rem; color: var(--text-1); line-height: 1.4; }
+.mq a { color: inherit; text-decoration: none; }
+.mq a:hover { color: var(--green); }
+.price-yes  { font-family: var(--font-mono); font-weight: 500; color: var(--green); }
+.price-no   { font-family: var(--font-mono); font-weight: 500; color: var(--red); }
+.price-cost { font-family: var(--font-mono); color: var(--text-2); }
 .profit-pos { font-family: var(--font-mono); font-weight: 600; color: var(--green); }
-.profit-neg { font-family: var(--font-mono); font-weight: 500; color: var(--text-3); }
-
-/* APY — the hero column */
-.apy-cell {
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: .9rem;
-  white-space: nowrap;
-}
+.profit-neg { font-family: var(--font-mono); color: var(--text-3); }
+.apy-cell   { font-family: var(--font-mono); font-weight: 600; font-size: .9rem; }
 .apy-high   { color: var(--green); }
 .apy-mid    { color: var(--amber); }
 .apy-low    { color: var(--text-2); }
-.apy-none   { color: var(--text-3); }
 .apy-neg    { color: var(--red); }
-
-.td-days  { font-family: var(--font-mono); font-size: .78rem; color: var(--text-2); }
-.td-vol   { font-family: var(--font-mono); font-size: .78rem; color: var(--blue); }
-
-/* status badge */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  border-radius: 3px;
-  font-size: .68rem;
-  font-weight: 600;
-  letter-spacing: .03em;
-  white-space: nowrap;
-}
+.apy-none   { color: var(--text-3); }
+.td-days    { font-family: var(--font-mono); font-size: .78rem; color: var(--text-2); }
+.td-vol     { font-family: var(--font-mono); font-size: .78rem; color: var(--blue); }
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 3px; font-size: .67rem; font-weight: 600; letter-spacing: .02em; white-space: nowrap; }
 .badge-arb  { background: var(--green-bg); color: var(--green); }
 .badge-miss { background: transparent; color: var(--text-3); border: 1px solid var(--border); }
+.edge-bar  { width: 60px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.edge-fill { height: 100%; border-radius: 2px; background: var(--green); }
 
-/* edge bar */
-.edge-bar { width: 60px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.edge-fill { height: 100%; border-radius: 2px; background: var(--green); transition: width .3s ease; }
+/* STATUS IN TABLE */
+.tbl-status { text-align: center; padding: 80px 24px; color: var(--text-3); }
+.tbl-status .icon { font-size: 1.4rem; margin-bottom: 12px; }
+.tbl-status .msg  { font-size: .85rem; color: var(--text-2); margin-bottom: 6px; }
+.tbl-status .sub  { font-size: .75rem; color: var(--text-3); line-height: 1.6; }
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border-mid); border-top-color: var(--green); border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 6px; }
 
-/* ─── EMPTY / STATUS ─────────────────────────────────────────────────────── */
-.table-status {
-  text-align: center;
-  padding: 80px 24px;
-  color: var(--text-3);
-}
-.table-status .icon { font-size: 1.5rem; margin-bottom: 12px; }
-.table-status .msg  { font-size: .85rem; color: var(--text-2); margin-bottom: 6px; }
-.table-status .sub  { font-size: .75rem; color: var(--text-3); }
-
-.spinner {
-  display: inline-block;
-  width: 16px; height: 16px;
-  border: 2px solid var(--border-mid);
-  border-top-color: var(--green);
-  border-radius: 50%;
-  animation: spin .7s linear infinite;
-  vertical-align: middle;
-  margin-right: 8px;
-}
-
-/* ─── FOOTER ─────────────────────────────────────────────────────────────── */
+/* FOOTER */
 footer {
-  background: var(--bg-panel);
-  border-top: 1px solid var(--border);
-  padding: 14px 24px;
-  display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
-  align-items: center;
+  background: var(--bg-panel); border-top: 1px solid var(--border);
+  padding: 12px 24px; display: flex; gap: 24px; flex-wrap: wrap;
 }
-.footer-item {
-  font-size: .7rem;
-  color: var(--text-3);
-  display: flex;
-  gap: 6px;
-}
+.footer-item { font-size: .7rem; color: var(--text-3); display: flex; gap: 5px; }
 .footer-item b { color: var(--text-2); font-weight: 500; }
-
-/* ─── FORMULA PANEL ─────────────────────────────────────────────────────── */
-.formula-bar {
-  background: var(--bg-panel);
-  border-bottom: 1px solid var(--border);
-  padding: 12px 24px;
-  display: flex;
-  gap: 32px;
-  flex-wrap: wrap;
-  align-items: flex-start;
-}
-.formula-block { min-width: 180px; }
-.formula-title {
-  font-size: .68rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .07em;
-  color: var(--text-3);
-  margin-bottom: 6px;
-}
-.formula-line {
-  font-family: var(--font-mono);
-  font-size: .75rem;
-  color: var(--text-2);
-  line-height: 1.7;
-}
-.formula-line .hl { color: var(--green); font-weight: 500; }
-.formula-line .hl-a { color: var(--amber); font-weight: 500; }
-
 </style>
 </head>
 <body>
 <div class="app">
 
-  <!-- ── TOPBAR ── -->
+  <!-- TOPBAR -->
   <header class="topbar">
     <a class="brand" href="#">
       <div class="brand-mark">
-        <svg viewBox="0 0 16 16"><path d="M3 13 L8 3 L13 13 M5.5 9.5 L10.5 9.5" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round">
+          <path d="M3 13L8 3L13 13"/><path d="M5.5 9.5H10.5"/>
+        </svg>
       </div>
       <span class="brand-name">PolyArb</span>
       <span class="brand-tag">Arbitrage Scanner</span>
     </a>
-
-    <div class="topbar-center">
+    <div class="topbar-mid">
       <div class="status-pill loading" id="status-pill">
         <span class="status-dot"></span>
         <span id="status-text">Connecting</span>
       </div>
-      <span class="status-time" id="status-time"></span>
+      <span class="status-ts" id="status-ts"></span>
     </div>
-
     <div class="topbar-right">
       <span class="theme-label" id="theme-label">Dark</span>
-      <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle theme"></button>
+      <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()"></button>
     </div>
   </header>
 
-  <!-- ── FORMULA BAR ── -->
+  <!-- FORMULA BAR -->
   <div class="formula-bar" id="formula-bar">
     <div class="formula-block">
       <div class="formula-title">Core Logic</div>
       <div class="formula-line">Buy <span class="hl">YES</span> + <span class="hl">NO</span> of the same market.</div>
       <div class="formula-line">One must resolve to <span class="hl">$1.00</span>.</div>
-      <div class="formula-line">Arb exists when <span class="hl">Cost &lt; $1.00</span>.</div>
+      <div class="formula-line">Arb when <span class="hl">total cost &lt; $1.00</span>.</div>
     </div>
     <div class="formula-block">
-      <div class="formula-title">Calculation</div>
+      <div class="formula-title">Formulas</div>
       <div class="formula-line">Cost = YES×(1+fee) + NO×(1+fee)</div>
       <div class="formula-line">Profit = <span class="hl">$1.00 − Cost</span></div>
       <div class="formula-line">APY = (Profit/Cost) × (365/days)</div>
     </div>
     <div class="formula-block">
-      <div class="formula-title">Example  <span style="font-weight:400;color:var(--text-3)">(fee = 2%)</span></div>
-      <div class="formula-line">YES=48¢, NO=49¢ → Cost = <span class="hl-a">98.94¢</span></div>
-      <div class="formula-line">Profit = <span class="hl">+1.06¢  (+1.07%)</span></div>
-      <div class="formula-line">30-day market → APY ≈ <span class="hl">+13.0%</span></div>
+      <div class="formula-title">Example &nbsp;<span style="font-weight:400;color:var(--text-3)">fee=2%</span></div>
+      <div class="formula-line">YES=48¢, NO=49¢ → Cost=<span class="hla">98.94¢</span></div>
+      <div class="formula-line">Profit = <span class="hl">+1.06¢ (+1.07%)</span></div>
+      <div class="formula-line">30-day market → APY = <span class="hl">+13.0%</span></div>
     </div>
-    <div style="margin-left:auto;align-self:center;">
-      <button onclick="document.getElementById('formula-bar').style.display='none'"
-        style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:.75rem;font-family:var(--font-body);">
-        Hide ✕
-      </button>
-    </div>
+    <button class="formula-close" onclick="document.getElementById('formula-bar').style.display='none'">Hide ✕</button>
   </div>
 
-  <!-- ── STATS ROW ── -->
+  <!-- STATS -->
   <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-label">Markets Scanned</div>
-      <div class="stat-value blue" id="s-total">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Arb Opportunities</div>
-      <div class="stat-value green" id="s-arb">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Best APY</div>
-      <div class="stat-value green" id="s-best">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Avg Profit</div>
-      <div class="stat-value amber" id="s-avg">—</div>
-      <div class="stat-sub" id="s-avg-sub">per arb opportunity</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Total Edge</div>
-      <div class="stat-value amber" id="s-edge">—</div>
-      <div class="stat-sub">sum of all profits</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Fee per Side</div>
-      <div class="stat-value" id="s-fee">2.00%</div>
-    </div>
+    <div class="stat-card"><div class="stat-label">Markets Scanned</div><div class="stat-value blue" id="s-total">—</div></div>
+    <div class="stat-card"><div class="stat-label">Arb Opportunities</div><div class="stat-value green" id="s-arb">—</div></div>
+    <div class="stat-card"><div class="stat-label">Best APY</div><div class="stat-value green" id="s-best">—</div></div>
+    <div class="stat-card"><div class="stat-label">Avg Profit</div><div class="stat-value amber" id="s-avg">—</div><div class="stat-sub">per arb opportunity</div></div>
+    <div class="stat-card"><div class="stat-label">Total Edge</div><div class="stat-value amber" id="s-edge">—</div><div class="stat-sub">sum of all profits</div></div>
+    <div class="stat-card"><div class="stat-label">Fee per Side</div><div class="stat-value" id="s-fee">2.00%</div></div>
   </div>
 
-  <!-- ── TOOLBAR ── -->
+  <!-- TOOLBAR -->
   <div class="toolbar">
     <div class="toolbar-group">
       <button class="filter-btn" id="btn-all"  onclick="setFilter('all')">All Markets</button>
-      <button class="filter-btn active" id="btn-arb"  onclick="setFilter('arb')">Arb Only</button>
-      <button class="filter-btn" id="btn-near" onclick="setFilter('near')">Near-Miss <span style="opacity:.6">&lt;1¢</span></button>
+      <button class="filter-btn active" id="btn-arb" onclick="setFilter('arb')">Arb Only</button>
+      <button class="filter-btn" id="btn-near" onclick="setFilter('near')">Near-Miss &lt;1¢</button>
     </div>
-
-    <div class="toolbar-divider"></div>
-
+    <div class="divider"></div>
     <div class="fee-group">
       <span class="fee-label">Taker Fee</span>
-      <div class="fee-input-wrap">
+      <div class="fee-wrap">
         <input type="number" class="fee-input" id="fee" value="2" min="0" max="20" step="0.1">
         <span class="fee-unit">%</span>
       </div>
       <span class="fee-label">per side</span>
     </div>
-
-    <div class="toolbar-divider"></div>
-
+    <div class="divider"></div>
     <button class="refresh-btn" id="refresh-btn" onclick="loadAll()">
       <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-        <path d="M10.5 2.5A5 5 0 1 0 11 6.5"/>
-        <path d="M10.5 2.5V5.5H7.5"/>
+        <path d="M10.5 2.5A5 5 0 1 0 11 6.5"/><path d="M10.5 2.5V5.5H7.5"/>
       </svg>
       Refresh
     </button>
-
-    <div class="toolbar-right" id="toolbar-note">—</div>
+    <div class="toolbar-note" id="toolbar-note">—</div>
   </div>
 
-  <!-- ── TABLE ── -->
+  <!-- TABLE -->
   <div class="main">
     <table>
       <thead>
         <tr>
           <th class="td-rank">#</th>
-          <th id="h-question" onclick="sortBy('question')">
-            Market <span class="sort-icon">↕</span>
-          </th>
-          <th class="num" id="h-yes" onclick="sortBy('yes')">
-            YES <span class="sort-icon">↕</span>
-          </th>
-          <th class="num" id="h-no" onclick="sortBy('no')">
-            NO <span class="sort-icon">↕</span>
-          </th>
-          <th class="num" id="h-cost" onclick="sortBy('cost')">
-            Total Cost <span class="sort-icon">↕</span>
-          </th>
-          <th class="num" id="h-profit" onclick="sortBy('profit')">
-            Profit ¢ <span class="sort-icon">↕</span>
-          </th>
-          <th class="num" id="h-profitPct" onclick="sortBy('profitPct')">
-            Profit % <span class="sort-icon">↕</span>
-          </th>
-          <th class="num sort-active" id="h-apy" onclick="sortBy('apy')">
-            APY <span class="sort-icon">↓</span>
-          </th>
-          <th class="num" id="h-days" onclick="sortBy('days')">
-            Days <span class="sort-icon">↕</span>
-          </th>
-          <th class="num" id="h-volume" onclick="sortBy('volume')">
-            Volume <span class="sort-icon">↕</span>
-          </th>
+          <th id="h-question" onclick="sortBy('question')">Market <span class="si">↕</span></th>
+          <th class="num" id="h-yes"       onclick="sortBy('yes')">YES <span class="si">↕</span></th>
+          <th class="num" id="h-no"        onclick="sortBy('no')">NO <span class="si">↕</span></th>
+          <th class="num" id="h-cost"      onclick="sortBy('cost')">Total Cost <span class="si">↕</span></th>
+          <th class="num" id="h-profit"    onclick="sortBy('profit')">Profit ¢ <span class="si">↕</span></th>
+          <th class="num" id="h-profitPct" onclick="sortBy('profitPct')">Profit % <span class="si">↕</span></th>
+          <th class="num sort-active" id="h-apy" onclick="sortBy('apy')">APY <span class="si">↓</span></th>
+          <th class="num" id="h-days"   onclick="sortBy('days')">Days <span class="si">↕</span></th>
+          <th class="num" id="h-volume" onclick="sortBy('volume')">Volume <span class="si">↕</span></th>
           <th>Status</th>
           <th>Edge</th>
         </tr>
       </thead>
       <tbody id="tbody">
-        <tr>
-          <td colspan="12">
-            <div class="table-status">
-              <div class="msg"><span class="spinner"></span>Loading markets from Polymarket…</div>
-            </div>
-          </td>
-        </tr>
+        <tr><td colspan="12"><div class="tbl-status"><div class="msg"><span class="spinner"></span>Loading markets…</div></div></td></tr>
       </tbody>
     </table>
   </div>
 
-  <!-- ── FOOTER ── -->
+  <!-- FOOTER -->
   <footer>
     <div class="footer-item"><b>Logic:</b> Cost=(YES+NO)×(1+fee) · Profit=$1−Cost · APY=Profit%×(365/days)</div>
     <div class="footer-item"><b>Risk:</b> Execute both legs simultaneously — slippage can eliminate edge</div>
     <div class="footer-item"><b>Data:</b> Polymarket Gamma API via /api/markets · auto-refresh 60s</div>
   </footer>
 
-</div><!-- .app -->
+</div>
 
 <script>
-// ── STATE ──────────────────────────────────────────────────────────────────
 const LIMIT = 500, MAX_PAGES = 4;
 let raw = [], computed = [], cf = 'arb', _sc = 'apy', _sd = -1;
 let refreshTimer = null;
 
-// ── THEME ─────────────────────────────────────────────────────────────────
+// Theme
 function toggleTheme() {
   const html = document.documentElement;
   const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
@@ -679,7 +390,7 @@ function toggleTheme() {
   document.getElementById('theme-label').textContent = next === 'dark' ? 'Dark' : 'Light';
   localStorage.setItem('polyarb-theme', next);
 }
-(function initTheme() {
+(function() {
   const saved = localStorage.getItem('polyarb-theme');
   if (saved) {
     document.documentElement.dataset.theme = saved;
@@ -687,7 +398,6 @@ function toggleTheme() {
   }
 })();
 
-// ── UTILS ─────────────────────────────────────────────────────────────────
 function getFee() { return Math.max(0, parseFloat(document.getElementById('fee').value) || 0) / 100; }
 
 function fmtVol(v) {
@@ -697,31 +407,24 @@ function fmtVol(v) {
   return '$' + v.toFixed(0);
 }
 
-function setStatusPill(state, text) {
-  const pill = document.getElementById('status-pill');
-  pill.className = 'status-pill ' + state;
+function setPill(state, text) {
+  const p = document.getElementById('status-pill');
+  p.className = 'status-pill ' + state;
   document.getElementById('status-text').textContent = text;
 }
 
-function setStatusTime(text) {
-  document.getElementById('status-time').textContent = text;
-}
-
-// ── FETCH ─────────────────────────────────────────────────────────────────
 async function loadAll() {
   const btn = document.getElementById('refresh-btn');
-  btn.disabled = true;
-  btn.classList.add('spinning');
-  setStatusPill('loading', 'Loading');
-  setTableStatus('<span class="spinner"></span> Fetching markets from Polymarket…');
+  btn.disabled = true; btn.classList.add('spinning');
+  setPill('loading', 'Loading');
+  setStatus('<span class="spinner"></span>Fetching markets from Polymarket…');
   if (refreshTimer) clearTimeout(refreshTimer);
 
   try {
     let all = [];
     for (let page = 0; page < MAX_PAGES; page++) {
-      const offset = page * LIMIT;
-      setTableStatus(`<span class="spinner"></span> Page ${page+1} of ${MAX_PAGES} &nbsp;·&nbsp; ${all.length} markets loaded`);
-      const res = await fetch(`/api/markets?limit=${LIMIT}&offset=${offset}`);
+      setStatus(`<span class="spinner"></span>Page ${page+1} / ${MAX_PAGES} &nbsp;·&nbsp; ${all.length} markets`);
+      const res = await fetch(`/api/markets?limit=${LIMIT}&offset=${page*LIMIT}`);
       if (!res.ok) throw new Error(`Server error ${res.status}`);
       const data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -730,31 +433,21 @@ async function loadAll() {
       if (data.length < LIMIT) break;
     }
     if (!all.length) throw new Error('No market data returned');
-    raw = all;
-    compute();
-    render();
-    setStatusPill('live', 'Live');
-    setStatusTime('Updated ' + new Date().toLocaleTimeString());
+    raw = all; compute(); render();
+    setPill('live', 'Live');
+    document.getElementById('status-ts').textContent = 'Updated ' + new Date().toLocaleTimeString();
     refreshTimer = setTimeout(loadAll, 60000);
   } catch(e) {
-    setTableStatus(`
-      <div class="icon">⚠</div>
-      <div class="msg">${e.message}</div>
-      <div class="sub">Check Vercel function logs for details.</div>
-    `);
-    setStatusPill('error', 'Error');
+    setStatus(`<div class="icon">⚠</div><div class="msg">${e.message}</div><div class="sub">Check Vercel function logs with: <code>vercel logs</code></div>`);
+    setPill('error', 'Error');
   }
-
-  btn.disabled = false;
-  btn.classList.remove('spinning');
+  btn.disabled = false; btn.classList.remove('spinning');
 }
 
-function setTableStatus(html) {
-  document.getElementById('tbody').innerHTML =
-    `<tr><td colspan="12"><div class="table-status">${html}</div></td></tr>`;
+function setStatus(html) {
+  document.getElementById('tbody').innerHTML = `<tr><td colspan="12"><div class="tbl-status">${html}</div></td></tr>`;
 }
 
-// ── COMPUTE ───────────────────────────────────────────────────────────────
 function compute() {
   const f = getFee(), now = Date.now();
   computed = raw.map(m => {
@@ -769,117 +462,98 @@ function compute() {
         no  = parseFloat(prices[ni !== -1 ? ni : 1]);
       }
     } catch(e) {}
-    if (!yes || !no || isNaN(yes) || isNaN(no) || yes <= 0 || no <= 0 || yes >= 1 || no >= 1) return null;
-
-    const cost = yes * (1+f) + no * (1+f);
-    const profit = 1 - cost;
-    const profitPct = (profit / cost) * 100;
+    if (!yes || !no || isNaN(yes) || isNaN(no) || yes<=0 || no<=0 || yes>=1 || no>=1) return null;
+    const cost = yes*(1+f) + no*(1+f);
+    const profit = 1 - cost, profitPct = (profit/cost)*100;
     let days = null;
-    if (m.endDate) days = Math.max((new Date(m.endDate) - now) / 86400000, 0.1);
-    const apy = days ? (profit / cost) * (365 / days) * 100 : null;
-
+    if (m.endDate) days = Math.max((new Date(m.endDate)-now)/86400000, 0.1);
+    const apy = days ? (profit/cost)*(365/days)*100 : null;
     return {
-      question: m.question || '—', slug: m.slug || '',
+      question: m.question||'—', slug: m.slug||'',
       yes, no, cost, profit, profitPct, apy, days,
-      volume: parseFloat(m.volume || 0),
-      isArb:  profit > 0,
-      isNear: profit <= 0 && profit > -0.01,
+      volume: parseFloat(m.volume||0),
+      isArb: profit>0, isNear: profit<=0&&profit>-0.01,
     };
   }).filter(Boolean);
 }
 
-// ── FILTER + SORT + RENDER ────────────────────────────────────────────────
 function setFilter(f) {
   cf = f;
-  ['all','arb','near'].forEach(k =>
-    document.getElementById('btn-'+k).classList.toggle('active', k === f)
-  );
+  ['all','arb','near'].forEach(k => document.getElementById('btn-'+k).classList.toggle('active', k===f));
   render();
 }
 
 function sortBy(col) {
-  if (_sc === col) _sd *= -1; else { _sc = col; _sd = -1; }
+  if (_sc===col) _sd*=-1; else { _sc=col; _sd=-1; }
   document.querySelectorAll('thead th').forEach(th => {
     th.classList.remove('sort-active');
-    const icon = th.querySelector('.sort-icon');
-    if (icon) icon.textContent = '↕';
+    const si = th.querySelector('.si'); if (si) si.textContent = '↕';
   });
-  const h = document.getElementById('h-' + col);
-  if (h) {
-    h.classList.add('sort-active');
-    const icon = h.querySelector('.sort-icon');
-    if (icon) icon.textContent = _sd === 1 ? '↑' : '↓';
-  }
+  const h = document.getElementById('h-'+col);
+  if (h) { h.classList.add('sort-active'); const si=h.querySelector('.si'); if(si) si.textContent=_sd===1?'↑':'↓'; }
   render();
 }
 
 function render() {
   let rows = computed;
-  if (cf === 'arb')  rows = rows.filter(r => r.isArb);
-  if (cf === 'near') rows = rows.filter(r => r.isNear);
-
-  rows = [...rows].sort((a, b) => {
-    let av = a[_sc], bv = b[_sc];
-    if (av == null && bv == null) return 0;
-    if (av == null) return 1; if (bv == null) return -1;
-    if (typeof av === 'string') return av.localeCompare(bv) * _sd;
-    return (av - bv) * _sd;
+  if (cf==='arb')  rows = rows.filter(r=>r.isArb);
+  if (cf==='near') rows = rows.filter(r=>r.isNear);
+  rows = [...rows].sort((a,b) => {
+    let av=a[_sc],bv=b[_sc];
+    if(av==null&&bv==null)return 0; if(av==null)return 1; if(bv==null)return -1;
+    if(typeof av==='string')return av.localeCompare(bv)*_sd;
+    return (av-bv)*_sd;
   });
 
-  const counts = { all: computed.length, arb: computed.filter(r=>r.isArb).length, near: computed.filter(r=>r.isNear).length };
-  const labels = { all:`${counts.all} markets`, arb:`${counts.arb} arb opportunities`, near:`${counts.near} near-miss markets` };
-  document.getElementById('toolbar-note').textContent = labels[cf];
+  const counts = { all:computed.length, arb:computed.filter(r=>r.isArb).length, near:computed.filter(r=>r.isNear).length };
+  document.getElementById('toolbar-note').textContent =
+    { all:`${counts.all} markets`, arb:`${counts.arb} arb opportunities`, near:`${counts.near} near-miss markets` }[cf];
 
   const tbody = document.getElementById('tbody');
-  if (!rows.length) {
-    setTableStatus('<div class="msg">No markets match this filter.</div>');
-    updateStats(); return;
-  }
+  if (!rows.length) { setStatus('<div class="msg">No markets match this filter.</div>'); updateStats(); return; }
 
-  tbody.innerHTML = rows.map((r, i) => {
-    const apyCls = !r.apy ? 'apy-none' : r.apy > 100 ? 'apy-high' : r.apy > 30 ? 'apy-high' : r.apy > 10 ? 'apy-mid' : r.apy > 0 ? 'apy-low' : 'apy-neg';
-    const apyStr = r.apy != null ? (r.apy > 0 ? '+' : '') + r.apy.toFixed(1) + '%' : '—';
-    const pCls   = r.profit >= 0 ? 'profit-pos' : 'profit-neg';
-    const pSign  = r.profit >= 0 ? '+' : '';
-    const badge  = r.isArb
+  tbody.innerHTML = rows.map((r,i) => {
+    const ac = !r.apy?'apy-none':r.apy>30?'apy-high':r.apy>10?'apy-mid':r.apy>0?'apy-low':'apy-neg';
+    const as = r.apy!=null?(r.apy>0?'+':'')+r.apy.toFixed(1)+'%':'—';
+    const pCls = r.profit>=0?'profit-pos':'profit-neg';
+    const ps   = r.profit>=0?'+':'';
+    const badge = r.isArb
       ? `<span class="badge badge-arb">✓ Arb</span>`
       : `<span class="badge badge-miss">${(r.profit*100).toFixed(2)}¢ miss</span>`;
-    const edgePct = r.isArb ? Math.min(100, r.profitPct * 8) : 0;
-    const link   = r.slug ? `https://polymarket.com/event/${r.slug}` : '#';
-
+    const ep  = r.isArb ? Math.min(100, r.profitPct*8) : 0;
+    const link = r.slug ? `https://polymarket.com/event/${r.slug}` : '#';
     return `<tr>
-      <td class="td-rank">${i + 1}</td>
-      <td class="td-market"><div class="market-q"><a href="${link}" target="_blank" rel="noopener">${r.question}</a></div></td>
+      <td class="td-rank">${i+1}</td>
+      <td class="td-market"><div class="mq"><a href="${link}" target="_blank" rel="noopener">${r.question}</a></div></td>
       <td class="num price-yes">${(r.yes*100).toFixed(1)}¢</td>
       <td class="num price-no">${(r.no*100).toFixed(1)}¢</td>
       <td class="num price-cost">${(r.cost*100).toFixed(2)}¢</td>
-      <td class="num ${pCls}">${pSign}${(r.profit*100).toFixed(2)}¢</td>
-      <td class="num ${pCls}">${pSign}${r.profitPct.toFixed(3)}%</td>
-      <td class="num apy-cell ${apyCls}">${apyStr}</td>
-      <td class="num td-days">${r.days != null ? r.days.toFixed(0)+'d' : '—'}</td>
+      <td class="num ${pCls}">${ps}${(r.profit*100).toFixed(2)}¢</td>
+      <td class="num ${pCls}">${ps}${r.profitPct.toFixed(3)}%</td>
+      <td class="num apy-cell ${ac}">${as}</td>
+      <td class="num td-days">${r.days!=null?r.days.toFixed(0)+'d':'—'}</td>
       <td class="num td-vol">${fmtVol(r.volume)}</td>
       <td>${badge}</td>
-      <td><div class="edge-bar"><div class="edge-fill" style="width:${edgePct}%"></div></div></td>
+      <td><div class="edge-bar"><div class="edge-fill" style="width:${ep}%"></div></div></td>
     </tr>`;
   }).join('');
-
   updateStats();
 }
 
 function updateStats() {
-  document.getElementById('s-fee').textContent   = (getFee()*100).toFixed(2) + '%';
-  document.getElementById('s-total').textContent = computed.length || '—';
-  const arb = computed.filter(r => r.isArb);
-  document.getElementById('s-arb').textContent   = arb.length || '—';
+  document.getElementById('s-fee').textContent   = (getFee()*100).toFixed(2)+'%';
+  document.getElementById('s-total').textContent = computed.length||'—';
+  const arb = computed.filter(r=>r.isArb);
+  document.getElementById('s-arb').textContent   = arb.length||'—';
   const best = arb.length ? Math.max(...arb.filter(r=>r.apy!=null).map(r=>r.apy)) : null;
-  document.getElementById('s-best').textContent  = best != null ? '+' + best.toFixed(1) + '%' : '—';
+  document.getElementById('s-best').textContent  = best!=null?'+'+best.toFixed(1)+'%':'—';
   const avg = arb.length ? arb.reduce((s,r)=>s+r.profitPct,0)/arb.length : null;
-  document.getElementById('s-avg').textContent   = avg != null ? '+' + avg.toFixed(3) + '%' : '—';
+  document.getElementById('s-avg').textContent   = avg!=null?'+'+avg.toFixed(3)+'%':'—';
   const edge = arb.reduce((s,r)=>s+r.profit,0);
-  document.getElementById('s-edge').textContent  = arb.length ? '$' + edge.toFixed(2) : '—';
+  document.getElementById('s-edge').textContent  = arb.length?'$'+edge.toFixed(2):'—';
 }
 
-document.getElementById('fee').addEventListener('input', () => { compute(); render(); });
+document.getElementById('fee').addEventListener('input', ()=>{ compute(); render(); });
 loadAll();
 </script>
 </body>
