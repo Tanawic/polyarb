@@ -3,557 +3,679 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PolyArb — Arbitrage Scanner</title>
+<title>PolyArb — Cross-Exchange Arbitrage</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+/* ── TOKENS ── */
 :root {
   --radius: 4px;
-  --transition: 180ms ease;
-  --green:     #26a69a;
-  --green-bg:  rgba(38,166,154,.12);
-  --green-dim: rgba(38,166,154,.06);
-  --red:       #ef5350;
-  --red-bg:    rgba(239,83,80,.1);
-  --amber:     #f59e0b;
-  --blue:      #3b82f6;
-  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', monospace;
+  --tr: 160ms ease;
+  --green:  #26a69a; --green-bg: rgba(38,166,154,.12); --green-dim: rgba(38,166,154,.06);
+  --red:    #ef5350; --red-bg:   rgba(239,83,80,.1);
+  --amber:  #f59e0b; --amber-bg: rgba(245,158,11,.1);
+  --blue:   #3b82f6; --blue-bg:  rgba(59,130,246,.1);
+  --purple: #8b5cf6; --purple-bg:rgba(139,92,246,.1);
+  --fb: 'IBM Plex Sans', system-ui, sans-serif;
+  --fm: 'IBM Plex Mono', monospace;
 }
 [data-theme="dark"] {
-  --bg:         #131722;
-  --bg-panel:   #1e222d;
-  --bg-hover:   #262b38;
-  --bg-input:   #2a2f3e;
-  --border:     #2a2f3e;
-  --border-mid: #363c4e;
-  --text-1:     #d1d4dc;
-  --text-2:     #787b86;
-  --text-3:     #4c525e;
-  --shadow:     0 1px 3px rgba(0,0,0,.4);
+  --bg:#131722; --panel:#1e222d; --hover:#262b38; --input:#2a2f3e;
+  --b:#2a2f3e; --bm:#363c4e; --t1:#d1d4dc; --t2:#787b86; --t3:#4c525e;
+  --shadow: 0 1px 4px rgba(0,0,0,.5);
 }
 [data-theme="light"] {
-  --bg:         #f0f3fa;
-  --bg-panel:   #ffffff;
-  --bg-hover:   #f4f6fb;
-  --bg-input:   #edf0f7;
-  --border:     #e1e4ed;
-  --border-mid: #cdd0db;
-  --text-1:     #131722;
-  --text-2:     #5d6170;
-  --text-3:     #9598a1;
-  --shadow:     0 1px 3px rgba(0,0,0,.08);
+  --bg:#f0f3fa; --panel:#ffffff; --hover:#f4f6fb; --input:#edf0f7;
+  --b:#e1e4ed; --bm:#cdd0db; --t1:#131722; --t2:#5d6170; --t3:#9598a1;
+  --shadow: 0 1px 4px rgba(0,0,0,.07);
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh;
+  -webkit-font-smoothing:antialiased;transition:background var(--tr),color var(--tr)}
+.app{display:flex;flex-direction:column;min-height:100vh}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 14px; }
-body {
-  font-family: var(--font-body);
-  background: var(--bg);
-  color: var(--text-1);
-  min-height: 100vh;
-  line-height: 1.5;
-  transition: background var(--transition), color var(--transition);
-  -webkit-font-smoothing: antialiased;
+/* ── TOPBAR ── */
+.topbar{
+  height:52px;background:var(--panel);border-bottom:1px solid var(--b);
+  display:flex;align-items:center;padding:0 20px;gap:14px;
+  position:sticky;top:0;z-index:200;box-shadow:var(--shadow);
 }
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0}
+.brand-mark{width:28px;height:28px;background:var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center}
+.brand-mark svg{width:16px;height:16px}
+.brand-name{font-family:var(--fm);font-weight:600;font-size:.92rem;color:var(--t1)}
+.brand-tag{font-size:.68rem;color:var(--t3)}
+.tb-mid{flex:1;display:flex;align-items:center;gap:10px}
+.pill{display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:500;border:1px solid transparent;transition:all var(--tr)}
+.pill.live   {color:var(--green);background:var(--green-dim);border-color:rgba(38,166,154,.25)}
+.pill.error  {color:var(--red);  background:var(--red-bg);   border-color:rgba(239,83,80,.25)}
+.pill.loading{color:var(--t2);   background:var(--input);    border-color:var(--b)}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.live .pill-dot{animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.tb-clock{font-family:var(--fm);font-size:.7rem;color:var(--t3)}
+.tb-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.theme-lbl{font-size:.7rem;color:var(--t3)}
+.theme-toggle{width:36px;height:20px;background:var(--bm);border-radius:10px;position:relative;cursor:pointer;border:none;transition:background var(--tr)}
+.theme-toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform var(--tr);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+[data-theme="light"] .theme-toggle{background:var(--green)}
+[data-theme="light"] .theme-toggle::after{transform:translateX(16px)}
 
-.app { display: flex; flex-direction: column; min-height: 100vh; }
+/* ── EXCHANGE TABS ── */
+.ex-tabs{
+  background:var(--panel);border-bottom:1px solid var(--b);
+  padding:0 20px;display:flex;align-items:center;gap:0;
+}
+.ex-tab{
+  display:flex;align-items:center;gap:7px;
+  height:44px;padding:0 16px;border:none;
+  background:transparent;font-family:var(--fb);font-size:.8rem;font-weight:500;
+  color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;
+  transition:all var(--tr);white-space:nowrap;
+}
+.ex-tab:hover{color:var(--t1)}
+.ex-tab.active{color:var(--t1);border-bottom-color:var(--green)}
+.ex-dot{width:7px;height:7px;border-radius:50%}
+.ex-badge{font-size:.65rem;font-weight:600;padding:1px 6px;border-radius:3px}
+.ex-tab-right{margin-left:auto;display:flex;align-items:center;gap:8px}
 
-/* TOPBAR */
-.topbar {
-  height: 52px;
-  background: var(--bg-panel);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
-  gap: 16px;
-  position: sticky; top: 0; z-index: 100;
-  box-shadow: var(--shadow);
-}
-.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-.brand-mark {
-  width: 28px; height: 28px;
-  background: var(--green); border-radius: 6px;
-  display: flex; align-items: center; justify-content: center;
-}
-.brand-mark svg { width: 16px; height: 16px; }
-.brand-name { font-family: var(--font-mono); font-weight: 600; font-size: .95rem; letter-spacing: -.01em; color: var(--text-1); }
-.brand-tag  { font-size: .72rem; color: var(--text-3); }
-.topbar-mid { flex: 1; display: flex; align-items: center; gap: 8px; }
-.status-pill {
-  display: flex; align-items: center; gap: 5px;
-  padding: 3px 10px; border-radius: 20px;
-  font-size: .72rem; font-weight: 500; border: 1px solid transparent;
-  transition: all var(--transition);
-}
-.status-pill.live    { color: var(--green); background: var(--green-dim); border-color: rgba(38,166,154,.25); }
-.status-pill.error   { color: var(--red);   background: var(--red-bg);    border-color: rgba(239,83,80,.25); }
-.status-pill.loading { color: var(--text-2);background: var(--bg-input);  border-color: var(--border); }
-.status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-.status-pill.live .status-dot { animation: blink 2s ease-in-out infinite; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
-.status-ts { font-family: var(--font-mono); font-size: .68rem; color: var(--text-3); }
+/* exchange color coding */
+.src-poly   {background:rgba(38,166,154,.15);color:var(--green)}
+.src-azuro  {background:var(--blue-bg);color:var(--blue)}
+.src-cross  {background:var(--purple-bg);color:var(--purple)}
 
-.topbar-right { display: flex; align-items: center; gap: 8px; }
-.theme-label { font-size: .72rem; color: var(--text-3); }
-.theme-toggle {
-  width: 36px; height: 20px; background: var(--border-mid);
-  border-radius: 10px; position: relative; cursor: pointer; border: none;
-  transition: background var(--transition);
-}
-.theme-toggle::after {
-  content: ''; position: absolute; top: 2px; left: 2px;
-  width: 16px; height: 16px; border-radius: 50%; background: #fff;
-  transition: transform var(--transition); box-shadow: 0 1px 3px rgba(0,0,0,.2);
-}
-[data-theme="light"] .theme-toggle::after { transform: translateX(16px); }
-[data-theme="light"] .theme-toggle { background: var(--green); }
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(6,1fr);background:var(--panel);border-bottom:1px solid var(--b)}
+@media(max-width:900px){.stats{grid-template-columns:repeat(3,1fr)}}
+.stat{padding:12px 18px;border-right:1px solid var(--b);transition:background var(--tr)}
+.stat:last-child{border-right:none}
+.stat:hover{background:var(--hover)}
+.stat-lbl{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:4px}
+.stat-val{font-family:var(--fm);font-size:1.2rem;font-weight:600;color:var(--t1);line-height:1}
+.stat-val.g{color:var(--green)}.stat-val.a{color:var(--amber)}.stat-val.b{color:var(--blue)}.stat-val.p{color:var(--purple)}
+.stat-sub{font-size:.65rem;color:var(--t3);margin-top:3px}
 
-/* FORMULA BAR */
-.formula-bar {
-  background: var(--bg-panel);
-  border-bottom: 1px solid var(--border);
-  padding: 10px 24px;
-  display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start;
+/* ── TOOLBAR ── */
+.toolbar{
+  background:var(--panel);border-bottom:1px solid var(--b);
+  padding:0 20px;display:flex;align-items:center;gap:8px;height:44px;flex-wrap:wrap;
 }
-.formula-block { min-width: 180px; }
-.formula-title { font-size: .67rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--text-3); margin-bottom: 5px; }
-.formula-line  { font-family: var(--font-mono); font-size: .73rem; color: var(--text-2); line-height: 1.75; }
-.hl  { color: var(--green); font-weight: 500; }
-.hla { color: var(--amber); font-weight: 500; }
-.formula-close {
-  margin-left: auto; align-self: center;
-  background: none; border: none; cursor: pointer;
-  color: var(--text-3); font-size: .75rem; font-family: var(--font-body);
-  padding: 4px 8px; border-radius: var(--radius);
-  transition: all var(--transition);
+.tbar-group{display:flex;align-items:center;gap:4px}
+.tdiv{width:1px;height:18px;background:var(--b);margin:0 4px}
+.fbtn{
+  height:28px;padding:0 11px;border:1px solid var(--b);background:transparent;
+  border-radius:var(--radius);font-family:var(--fb);font-size:.73rem;font-weight:500;
+  color:var(--t2);cursor:pointer;transition:all var(--tr);white-space:nowrap;
 }
-.formula-close:hover { background: var(--bg-hover); color: var(--text-1); }
+.fbtn:hover{background:var(--hover);color:var(--t1)}
+.fbtn.on{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.fee-grp{display:flex;align-items:center;gap:7px}
+.fee-lbl{font-size:.73rem;color:var(--t2);white-space:nowrap}
+.fee-wrap{position:relative}
+.fee-in{
+  width:64px;height:28px;background:var(--input);border:1px solid var(--b);
+  border-radius:var(--radius);font-family:var(--fm);font-size:.78rem;font-weight:500;
+  color:var(--t1);text-align:right;padding:0 20px 0 8px;outline:none;
+  transition:border-color var(--tr);
+}
+.fee-in:focus{border-color:var(--green)}
+.fee-u{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:.68rem;color:var(--t3);pointer-events:none}
+.rbtn{
+  height:28px;padding:0 11px;background:transparent;border:1px solid var(--b);
+  border-radius:var(--radius);font-family:var(--fb);font-size:.73rem;font-weight:500;
+  color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:5px;transition:all var(--tr);
+}
+.rbtn:hover{background:var(--hover);color:var(--t1)}
+.rbtn:disabled{opacity:.35;cursor:not-allowed}
+.rbtn svg{width:12px;height:12px}
+.rbtn.spin svg{animation:rot .7s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.tb-note{margin-left:auto;font-family:var(--fm);font-size:.7rem;color:var(--t3)}
 
-/* STATS ROW */
-.stats-row {
-  display: grid; grid-template-columns: repeat(6,1fr);
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-panel);
+/* ── TABLE ── */
+.main{flex:1;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:960px}
+thead{position:sticky;top:96px;z-index:10}
+thead tr{background:var(--panel);border-bottom:2px solid var(--bm)}
+th{
+  padding:9px 14px;text-align:left;font-size:.65rem;font-weight:600;
+  color:var(--t3);text-transform:uppercase;letter-spacing:.07em;
+  cursor:pointer;white-space:nowrap;user-select:none;transition:color var(--tr);
 }
-@media(max-width:900px){.stats-row{grid-template-columns:repeat(3,1fr)}}
-.stat-card {
-  padding: 14px 20px;
-  border-right: 1px solid var(--border);
-  transition: background var(--transition);
-}
-.stat-card:last-child { border-right: none; }
-.stat-card:hover { background: var(--bg-hover); }
-.stat-label { font-size: .67rem; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
-.stat-value { font-family: var(--font-mono); font-size: 1.25rem; font-weight: 600; color: var(--text-1); line-height: 1; }
-.stat-value.green { color: var(--green); }
-.stat-value.amber { color: var(--amber); }
-.stat-value.blue  { color: var(--blue); }
-.stat-sub { font-size: .67rem; color: var(--text-3); margin-top: 3px; font-family: var(--font-mono); }
+th:hover{color:var(--t1)}
+th.sa{color:var(--t1)}
+th .si{margin-left:3px;opacity:.35;font-size:.6rem}
+th.sa .si{opacity:1;color:var(--green)}
+th.r,td.r{text-align:right}
+tbody tr{border-bottom:1px solid var(--b);transition:background var(--tr)}
+tbody tr:hover{background:var(--hover)}
+td{padding:10px 14px;font-size:.8rem;vertical-align:middle}
 
-/* TOOLBAR */
-.toolbar {
-  background: var(--bg-panel); border-bottom: 1px solid var(--border);
-  padding: 0 24px; display: flex; align-items: center;
-  gap: 8px; height: 44px; flex-wrap: wrap;
-}
-.toolbar-group { display: flex; align-items: center; gap: 4px; }
-.divider { width: 1px; height: 20px; background: var(--border); margin: 0 6px; }
-.filter-btn {
-  height: 28px; padding: 0 12px;
-  border: 1px solid var(--border); background: transparent;
-  border-radius: var(--radius); font-family: var(--font-body);
-  font-size: .75rem; font-weight: 500; color: var(--text-2);
-  cursor: pointer; transition: all var(--transition); white-space: nowrap;
-}
-.filter-btn:hover { background: var(--bg-hover); color: var(--text-1); }
-.filter-btn.active { background: var(--green-bg); border-color: var(--green); color: var(--green); }
-.fee-group { display: flex; align-items: center; gap: 8px; }
-.fee-label { font-size: .75rem; color: var(--text-2); white-space: nowrap; }
-.fee-wrap { position: relative; }
-.fee-input {
-  width: 68px; height: 28px;
-  background: var(--bg-input); border: 1px solid var(--border);
-  border-radius: var(--radius); font-family: var(--font-mono);
-  font-size: .8rem; font-weight: 500; color: var(--text-1);
-  text-align: right; padding: 0 22px 0 8px; outline: none;
-  transition: border-color var(--transition);
-}
-.fee-input:focus { border-color: var(--green); }
-.fee-unit { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); font-size: .7rem; color: var(--text-3); pointer-events: none; font-family: var(--font-mono); }
-.refresh-btn {
-  height: 28px; padding: 0 12px; background: transparent;
-  border: 1px solid var(--border); border-radius: var(--radius);
-  font-family: var(--font-body); font-size: .75rem; font-weight: 500;
-  color: var(--text-2); cursor: pointer;
-  display: flex; align-items: center; gap: 6px;
-  transition: all var(--transition);
-}
-.refresh-btn:hover { background: var(--bg-hover); color: var(--text-1); }
-.refresh-btn:disabled { opacity: .4; cursor: not-allowed; }
-.refresh-btn svg { width: 12px; height: 12px; }
-.refresh-btn.spinning svg { animation: spin .7s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.toolbar-note { margin-left: auto; font-size: .72rem; color: var(--text-3); font-family: var(--font-mono); }
+.td-num{font-family:var(--fm);font-size:.78rem}
+.td-rank{font-family:var(--fm);font-size:.68rem;color:var(--t3);width:32px;text-align:right}
+.td-mkt{max-width:300px}
+.mkt-q{font-size:.8rem;color:var(--t1);line-height:1.4}
+.mkt-q a{color:inherit;text-decoration:none}
+.mkt-q a:hover{color:var(--green)}
+.mkt-src{display:flex;align-items:center;gap:5px;margin-top:4px}
+.src-tag{font-size:.6rem;font-weight:600;padding:1px 6px;border-radius:3px}
 
-/* TABLE */
-.main { flex: 1; overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; min-width: 900px; }
-thead { position: sticky; top: 96px; z-index: 10; }
-thead tr { background: var(--bg-panel); border-bottom: 2px solid var(--border-mid); }
-th {
-  padding: 10px 16px; text-align: left;
-  font-size: .67rem; font-weight: 600; color: var(--text-3);
-  text-transform: uppercase; letter-spacing: .07em;
-  cursor: pointer; white-space: nowrap; user-select: none;
-  transition: color var(--transition);
-}
-th:hover { color: var(--text-1); }
-th.sort-active { color: var(--text-1); }
-th .si { margin-left: 3px; opacity: .4; font-size: .65rem; }
-th.sort-active .si { opacity: 1; color: var(--green); }
-th.num, td.num { text-align: right; }
-tbody tr { border-bottom: 1px solid var(--border); transition: background var(--transition); }
-tbody tr:hover { background: var(--bg-hover); }
-td { padding: 11px 16px; font-size: .82rem; vertical-align: middle; }
-.td-rank { font-family: var(--font-mono); font-size: .7rem; color: var(--text-3); width: 36px; text-align: right; }
-.td-market { max-width: 320px; }
-.mq { font-size: .82rem; color: var(--text-1); line-height: 1.4; }
-.mq a { color: inherit; text-decoration: none; }
-.mq a:hover { color: var(--green); }
-.price-yes  { font-family: var(--font-mono); font-weight: 500; color: var(--green); }
-.price-no   { font-family: var(--font-mono); font-weight: 500; color: var(--red); }
-.price-cost { font-family: var(--font-mono); color: var(--text-2); }
-.profit-pos { font-family: var(--font-mono); font-weight: 600; color: var(--green); }
-.profit-neg { font-family: var(--font-mono); color: var(--text-3); }
-.apy-cell   { font-family: var(--font-mono); font-weight: 600; font-size: .9rem; }
-.apy-high   { color: var(--green); }
-.apy-mid    { color: var(--amber); }
-.apy-low    { color: var(--text-2); }
-.apy-neg    { color: var(--red); }
-.apy-none   { color: var(--text-3); }
-.td-days    { font-family: var(--font-mono); font-size: .78rem; color: var(--text-2); }
-.td-vol     { font-family: var(--font-mono); font-size: .78rem; color: var(--blue); }
-.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 3px; font-size: .67rem; font-weight: 600; letter-spacing: .02em; white-space: nowrap; }
-.badge-arb  { background: var(--green-bg); color: var(--green); }
-.badge-miss { background: transparent; color: var(--text-3); border: 1px solid var(--border); }
-.edge-bar  { width: 60px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.edge-fill { height: 100%; border-radius: 2px; background: var(--green); }
+/* prices */
+.p-yes {color:var(--green);font-family:var(--fm);font-weight:500}
+.p-no  {color:var(--red);  font-family:var(--fm);font-weight:500}
+.p-cost{color:var(--t2);   font-family:var(--fm)}
 
-/* STATUS IN TABLE */
-.tbl-status { text-align: center; padding: 80px 24px; color: var(--text-3); }
-.tbl-status .icon { font-size: 1.4rem; margin-bottom: 12px; }
-.tbl-status .msg  { font-size: .85rem; color: var(--text-2); margin-bottom: 6px; }
-.tbl-status .sub  { font-size: .75rem; color: var(--text-3); line-height: 1.6; }
-.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border-mid); border-top-color: var(--green); border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 6px; }
+/* profit / apy */
+.pp{font-family:var(--fm);font-weight:600;color:var(--green)}
+.pn{font-family:var(--fm);color:var(--t3)}
+.apy{font-family:var(--fm);font-weight:600;font-size:.88rem}
+.ah{color:var(--green)}.am{color:var(--amber)}.al{color:var(--t2)}.az{color:var(--t3)}.an{color:var(--red)}
 
-/* FOOTER */
-footer {
-  background: var(--bg-panel); border-top: 1px solid var(--border);
-  padding: 12px 24px; display: flex; gap: 24px; flex-wrap: wrap;
+/* cross-exchange special */
+.cross-yes-src,.cross-no-src{font-size:.6rem;color:var(--t3);display:block}
+
+/* badge */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:3px;font-size:.65rem;font-weight:600;white-space:nowrap}
+.b-arb {background:var(--green-bg);color:var(--green)}
+.b-miss{background:transparent;color:var(--t3);border:1px solid var(--b)}
+.b-cross{background:var(--purple-bg);color:var(--purple)}
+
+.edge-bar{width:56px;height:3px;background:var(--b);border-radius:2px;overflow:hidden}
+.edge-fill{height:100%;border-radius:2px;background:var(--green)}
+
+/* empty / status */
+.tbl-st{text-align:center;padding:72px 24px;color:var(--t3)}
+.tbl-st .icon{font-size:1.4rem;margin-bottom:10px}
+.tbl-st .msg{font-size:.85rem;color:var(--t2);margin-bottom:6px}
+.tbl-st .sub{font-size:.73rem;color:var(--t3);line-height:1.7}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid var(--bm);border-top-color:var(--green);border-radius:50%;animation:rot .7s linear infinite;vertical-align:middle;margin-right:5px}
+
+/* cross-exchange info bar */
+.info-bar{
+  background:var(--purple-bg);border-bottom:1px solid rgba(139,92,246,.2);
+  padding:9px 20px;display:flex;align-items:center;gap:10px;
+  font-size:.72rem;color:var(--t2);
 }
-.footer-item { font-size: .7rem; color: var(--text-3); display: flex; gap: 5px; }
-.footer-item b { color: var(--text-2); font-weight: 500; }
+.info-bar strong{color:var(--purple)}
+.info-bar a{color:var(--purple);text-decoration:none}
+
+/* footer */
+footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;display:flex;gap:20px;flex-wrap:wrap}
+.fi{font-size:.68rem;color:var(--t3);display:flex;gap:5px}
+.fi b{color:var(--t2);font-weight:500}
 </style>
 </head>
 <body>
 <div class="app">
 
-  <!-- TOPBAR -->
-  <header class="topbar">
-    <a class="brand" href="#">
-      <div class="brand-mark">
-        <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round">
-          <path d="M3 13L8 3L13 13"/><path d="M5.5 9.5H10.5"/>
-        </svg>
-      </div>
-      <span class="brand-name">PolyArb</span>
-      <span class="brand-tag">Arbitrage Scanner</span>
-    </a>
-    <div class="topbar-mid">
-      <div class="status-pill loading" id="status-pill">
-        <span class="status-dot"></span>
-        <span id="status-text">Connecting</span>
-      </div>
-      <span class="status-ts" id="status-ts"></span>
+<!-- TOPBAR -->
+<header class="topbar">
+  <a class="brand" href="#">
+    <div class="brand-mark">
+      <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round">
+        <path d="M3 13L8 3L13 13"/><path d="M5.5 9.5H10.5"/>
+      </svg>
     </div>
-    <div class="topbar-right">
-      <span class="theme-label" id="theme-label">Dark</span>
-      <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()"></button>
+    <span class="brand-name">PolyArb</span>
+    <span class="brand-tag">Cross-Exchange Arbitrage</span>
+  </a>
+  <div class="tb-mid">
+    <div class="pill loading" id="pill">
+      <span class="pill-dot"></span><span id="pill-txt">Connecting</span>
     </div>
-  </header>
-
-  <!-- FORMULA BAR -->
-  <div class="formula-bar" id="formula-bar">
-    <div class="formula-block">
-      <div class="formula-title">Core Logic</div>
-      <div class="formula-line">Buy <span class="hl">YES</span> + <span class="hl">NO</span> of the same market.</div>
-      <div class="formula-line">One must resolve to <span class="hl">$1.00</span>.</div>
-      <div class="formula-line">Arb when <span class="hl">total cost &lt; $1.00</span>.</div>
-    </div>
-    <div class="formula-block">
-      <div class="formula-title">Formulas</div>
-      <div class="formula-line">Cost = YES×(1+fee) + NO×(1+fee)</div>
-      <div class="formula-line">Profit = <span class="hl">$1.00 − Cost</span></div>
-      <div class="formula-line">APY = (Profit/Cost) × (365/days)</div>
-    </div>
-    <div class="formula-block">
-      <div class="formula-title">Example &nbsp;<span style="font-weight:400;color:var(--text-3)">fee=2%</span></div>
-      <div class="formula-line">YES=48¢, NO=49¢ → Cost=<span class="hla">98.94¢</span></div>
-      <div class="formula-line">Profit = <span class="hl">+1.06¢ (+1.07%)</span></div>
-      <div class="formula-line">30-day market → APY = <span class="hl">+13.0%</span></div>
-    </div>
-    <button class="formula-close" onclick="document.getElementById('formula-bar').style.display='none'">Hide ✕</button>
+    <span class="tb-clock" id="clock">—</span>
   </div>
-
-  <!-- STATS -->
-  <div class="stats-row">
-    <div class="stat-card"><div class="stat-label">Markets Scanned</div><div class="stat-value blue" id="s-total">—</div></div>
-    <div class="stat-card"><div class="stat-label">Arb Opportunities</div><div class="stat-value green" id="s-arb">—</div></div>
-    <div class="stat-card"><div class="stat-label">Best APY</div><div class="stat-value green" id="s-best">—</div></div>
-    <div class="stat-card"><div class="stat-label">Avg Profit</div><div class="stat-value amber" id="s-avg">—</div><div class="stat-sub">per arb opportunity</div></div>
-    <div class="stat-card"><div class="stat-label">Total Edge</div><div class="stat-value amber" id="s-edge">—</div><div class="stat-sub">sum of all profits</div></div>
-    <div class="stat-card"><div class="stat-label">Fee per Side</div><div class="stat-value" id="s-fee">2.00%</div></div>
+  <div class="tb-right">
+    <span class="theme-lbl" id="theme-lbl">Dark</span>
+    <button class="theme-toggle" onclick="toggleTheme()"></button>
   </div>
+</header>
 
-  <!-- TOOLBAR -->
-  <div class="toolbar">
-    <div class="toolbar-group">
-      <button class="filter-btn" id="btn-all"  onclick="setFilter('all')">All Markets</button>
-      <button class="filter-btn active" id="btn-arb" onclick="setFilter('arb')">Arb Only</button>
-      <button class="filter-btn" id="btn-near" onclick="setFilter('near')">Near-Miss &lt;1¢</button>
-    </div>
-    <div class="divider"></div>
-    <div class="fee-group">
-      <span class="fee-label">Taker Fee</span>
-      <div class="fee-wrap">
-        <input type="number" class="fee-input" id="fee" value="2" min="0" max="20" step="0.1">
-        <span class="fee-unit">%</span>
-      </div>
-      <span class="fee-label">per side</span>
-    </div>
-    <div class="divider"></div>
-    <button class="refresh-btn" id="refresh-btn" onclick="loadAll()">
-      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+<!-- EXCHANGE TABS -->
+<div class="ex-tabs">
+  <button class="ex-tab active" id="tab-poly" onclick="setTab('poly')">
+    <span class="ex-dot" style="background:var(--green)"></span>
+    Polymarket
+    <span class="ex-badge src-poly" id="cnt-poly">—</span>
+  </button>
+  <button class="ex-tab" id="tab-azuro" onclick="setTab('azuro')">
+    <span class="ex-dot" style="background:var(--blue)"></span>
+    Azuro · BNB Chain
+    <span class="ex-badge src-azuro" id="cnt-azuro">—</span>
+  </button>
+  <button class="ex-tab" id="tab-cross" onclick="setTab('cross')">
+    <span class="ex-dot" style="background:var(--purple)"></span>
+    Cross-Exchange
+    <span class="ex-badge src-cross" id="cnt-cross">—</span>
+  </button>
+  <div class="ex-tab-right">
+    <button class="rbtn" id="rbtn" onclick="loadAll()">
+      <svg id="rsvg" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
         <path d="M10.5 2.5A5 5 0 1 0 11 6.5"/><path d="M10.5 2.5V5.5H7.5"/>
       </svg>
-      Refresh
+      Refresh All
     </button>
-    <div class="toolbar-note" id="toolbar-note">—</div>
   </div>
-
-  <!-- TABLE -->
-  <div class="main">
-    <table>
-      <thead>
-        <tr>
-          <th class="td-rank">#</th>
-          <th id="h-question" onclick="sortBy('question')">Market <span class="si">↕</span></th>
-          <th class="num" id="h-yes"       onclick="sortBy('yes')">YES <span class="si">↕</span></th>
-          <th class="num" id="h-no"        onclick="sortBy('no')">NO <span class="si">↕</span></th>
-          <th class="num" id="h-cost"      onclick="sortBy('cost')">Total Cost <span class="si">↕</span></th>
-          <th class="num" id="h-profit"    onclick="sortBy('profit')">Profit ¢ <span class="si">↕</span></th>
-          <th class="num" id="h-profitPct" onclick="sortBy('profitPct')">Profit % <span class="si">↕</span></th>
-          <th class="num sort-active" id="h-apy" onclick="sortBy('apy')">APY <span class="si">↓</span></th>
-          <th class="num" id="h-days"   onclick="sortBy('days')">Days <span class="si">↕</span></th>
-          <th class="num" id="h-volume" onclick="sortBy('volume')">Volume <span class="si">↕</span></th>
-          <th>Status</th>
-          <th>Edge</th>
-        </tr>
-      </thead>
-      <tbody id="tbody">
-        <tr><td colspan="12"><div class="tbl-status"><div class="msg"><span class="spinner"></span>Loading markets…</div></div></td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-item"><b>Logic:</b> Cost=(YES+NO)×(1+fee) · Profit=$1−Cost · APY=Profit%×(365/days)</div>
-    <div class="footer-item"><b>Risk:</b> Execute both legs simultaneously — slippage can eliminate edge</div>
-    <div class="footer-item"><b>Data:</b> Polymarket Gamma API via /api/markets · auto-refresh 60s</div>
-  </footer>
-
 </div>
 
-<script>
-const LIMIT = 500, MAX_PAGES = 4;
-let raw = [], computed = [], cf = 'arb', _sc = 'apy', _sd = -1;
-let refreshTimer = null;
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-lbl">Poly Markets</div><div class="stat-val b" id="s-pm">—</div></div>
+  <div class="stat"><div class="stat-lbl">Azuro Markets</div><div class="stat-val b" id="s-az">—</div></div>
+  <div class="stat"><div class="stat-lbl">Arb Opportunities</div><div class="stat-val g" id="s-arb">—</div></div>
+  <div class="stat"><div class="stat-lbl">Best APY</div><div class="stat-val g" id="s-best">—</div></div>
+  <div class="stat"><div class="stat-lbl">Cross-Exchange Ops</div><div class="stat-val p" id="s-cross">—</div><div class="stat-sub">Poly ↔ Azuro</div></div>
+  <div class="stat"><div class="stat-lbl">Fee per Side</div><div class="stat-val" id="s-fee">2.00%</div></div>
+</div>
 
-// Theme
-function toggleTheme() {
-  const html = document.documentElement;
-  const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
-  html.dataset.theme = next;
-  document.getElementById('theme-label').textContent = next === 'dark' ? 'Dark' : 'Light';
-  localStorage.setItem('polyarb-theme', next);
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="tbar-group">
+    <button class="fbtn" id="f-all"  onclick="setFilter('all')">All</button>
+    <button class="fbtn on" id="f-arb"  onclick="setFilter('arb')">Arb Only</button>
+    <button class="fbtn" id="f-near" onclick="setFilter('near')">Near-Miss &lt;1¢</button>
+  </div>
+  <div class="tdiv"></div>
+  <div class="fee-grp">
+    <span class="fee-lbl">Taker Fee</span>
+    <div class="fee-wrap">
+      <input type="number" class="fee-in" id="fee" value="2" min="0" max="20" step="0.1">
+      <span class="fee-u">%</span>
+    </div>
+    <span class="fee-lbl">per side</span>
+  </div>
+  <div class="tb-note" id="tb-note">—</div>
+</div>
+
+<!-- INFO BAR for cross tab -->
+<div class="info-bar" id="info-cross" style="display:none">
+  <strong>⚡ Cross-Exchange Arb:</strong>
+  Buy YES on one platform + NO on another for the <em>same event</em>. If combined cost &lt; $1.00 (after fees) → guaranteed profit.
+  Markets matched by event name similarity.
+</div>
+
+<!-- TABLE -->
+<div class="main">
+  <table>
+    <thead>
+      <tr>
+        <th class="td-rank">#</th>
+        <th id="h-question" onclick="sortBy('question')">Market <span class="si">↕</span></th>
+        <th class="r" id="h-yes"       onclick="sortBy('yes')">YES <span class="si">↕</span></th>
+        <th class="r" id="h-no"        onclick="sortBy('no')">NO <span class="si">↕</span></th>
+        <th class="r" id="h-cost"      onclick="sortBy('cost')">Total Cost <span class="si">↕</span></th>
+        <th class="r" id="h-profit"    onclick="sortBy('profit')">Profit ¢ <span class="si">↕</span></th>
+        <th class="r" id="h-profitPct" onclick="sortBy('profitPct')">Profit % <span class="si">↕</span></th>
+        <th class="r sa" id="h-apy"    onclick="sortBy('apy')">APY <span class="si">↓</span></th>
+        <th class="r" id="h-days"      onclick="sortBy('days')">Days <span class="si">↕</span></th>
+        <th class="r" id="h-volume"    onclick="sortBy('volume')">Volume <span class="si">↕</span></th>
+        <th>Status</th>
+        <th>Edge</th>
+      </tr>
+    </thead>
+    <tbody id="tbody">
+      <tr><td colspan="12"><div class="tbl-st"><div class="msg"><span class="spinner"></span>Loading…</div></div></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="fi"><b>Same-Exchange Arb:</b> YES+NO of same market · Cost=(YES+NO)×(1+fee) · Profit=$1−Cost</div>
+  <div class="fi"><b>Cross-Exchange Arb:</b> YES on Poly + NO on Azuro (or reverse) · matched by event title</div>
+  <div class="fi"><b>APY:</b> Profit%×(365/days) · auto-refresh 60s</div>
+</footer>
+
+</div><!-- .app -->
+<script>
+// ── STATE ───────────────────────────────────────────────────────────────────
+let polyRaw=[], azuroRaw=[];
+let computed=[], cf='arb', currentTab='poly', _sc='apy', _sd=-1;
+let refreshTimer=null, clockTimer=null;
+
+// ── THEME ───────────────────────────────────────────────────────────────────
+function toggleTheme(){
+  const h=document.documentElement, n=h.dataset.theme==='dark'?'light':'dark';
+  h.dataset.theme=n;
+  document.getElementById('theme-lbl').textContent=n==='dark'?'Dark':'Light';
+  localStorage.setItem('pa-theme',n);
 }
-(function() {
-  const saved = localStorage.getItem('polyarb-theme');
-  if (saved) {
-    document.documentElement.dataset.theme = saved;
-    document.getElementById('theme-label').textContent = saved === 'dark' ? 'Dark' : 'Light';
-  }
+(()=>{
+  const s=localStorage.getItem('pa-theme');
+  if(s){document.documentElement.dataset.theme=s;document.getElementById('theme-lbl').textContent=s==='dark'?'Dark':'Light';}
 })();
 
-function getFee() { return Math.max(0, parseFloat(document.getElementById('fee').value) || 0) / 100; }
+// ── CLOCK ───────────────────────────────────────────────────────────────────
+function startClock(){
+  function tick(){ document.getElementById('clock').textContent=new Date().toLocaleTimeString(); }
+  tick();
+  clockTimer=setInterval(tick,1000);
+}
+startClock();
 
-function fmtVol(v) {
-  if (!v) return '—';
-  if (v >= 1e6) return '$' + (v/1e6).toFixed(1) + 'M';
-  if (v >= 1e3) return '$' + (v/1e3).toFixed(0) + 'K';
-  return '$' + v.toFixed(0);
+// ── UTILS ───────────────────────────────────────────────────────────────────
+function getFee(){ return Math.max(0,parseFloat(document.getElementById('fee').value)||0)/100; }
+
+// Smart APY formatter — always shows meaningful precision
+function fmtAPY(v){
+  if(v==null)return'—';
+  const s=v>0?'+':'';
+  const a=Math.abs(v);
+  if(a===0)return'0.000%';
+  if(a<0.01) return s+v.toFixed(4)+'%';
+  if(a<0.1)  return s+v.toFixed(3)+'%';
+  if(a<1)    return s+v.toFixed(2)+'%';
+  if(a<10)   return s+v.toFixed(1)+'%';
+  return s+v.toFixed(0)+'%';
 }
 
-function setPill(state, text) {
-  const p = document.getElementById('status-pill');
-  p.className = 'status-pill ' + state;
-  document.getElementById('status-text').textContent = text;
+function fmtPct(v){
+  if(v==null)return'—';
+  const s=v>0?'+':'';
+  const a=Math.abs(v);
+  if(a<0.001)return s+v.toFixed(4)+'%';
+  if(a<0.01) return s+v.toFixed(3)+'%';
+  return s+v.toFixed(3)+'%';
 }
 
-async function loadAll() {
-  const btn = document.getElementById('refresh-btn');
-  btn.disabled = true; btn.classList.add('spinning');
-  setPill('loading', 'Loading');
-  setStatus('<span class="spinner"></span>Fetching markets from Polymarket…');
-  if (refreshTimer) clearTimeout(refreshTimer);
+function fmtVol(v){
+  if(!v)return'—';
+  if(v>=1e6)return'$'+(v/1e6).toFixed(1)+'M';
+  if(v>=1e3)return'$'+(v/1e3).toFixed(0)+'K';
+  return'$'+v.toFixed(0);
+}
 
-  try {
-    let all = [];
-    for (let page = 0; page < MAX_PAGES; page++) {
-      setStatus(`<span class="spinner"></span>Page ${page+1} / ${MAX_PAGES} &nbsp;·&nbsp; ${all.length} markets`);
-      const res = await fetch(`/api/markets?limit=${LIMIT}&offset=${page*LIMIT}`);
-      if (!res.ok) throw new Error(`Server error ${res.status}`);
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      if (!Array.isArray(data) || !data.length) break;
-      all = all.concat(data);
-      if (data.length < LIMIT) break;
-    }
-    if (!all.length) throw new Error('No market data returned');
-    raw = all; compute(); render();
-    setPill('live', 'Live');
-    document.getElementById('status-ts').textContent = 'Updated ' + new Date().toLocaleTimeString();
-    refreshTimer = setTimeout(loadAll, 60000);
-  } catch(e) {
-    setStatus(`<div class="icon">⚠</div><div class="msg">${e.message}</div><div class="sub">Check Vercel function logs with: <code>vercel logs</code></div>`);
-    setPill('error', 'Error');
+function setPill(state,txt){
+  const p=document.getElementById('pill');
+  p.className='pill '+state;
+  document.getElementById('pill-txt').textContent=txt;
+}
+
+function setTbStatus(html){
+  document.getElementById('tbody').innerHTML=`<tr><td colspan="12"><div class="tbl-st">${html}</div></td></tr>`;
+}
+
+// ── FETCH ───────────────────────────────────────────────────────────────────
+async function loadAll(){
+  const btn=document.getElementById('rbtn');
+  btn.disabled=true;
+  document.getElementById('rsvg').parentElement.classList.add('spin');
+  setPill('loading','Loading');
+  if(refreshTimer)clearTimeout(refreshTimer);
+
+  // Fetch both in parallel
+  const [pm, az] = await Promise.allSettled([fetchPolymarket(), fetchAzuro()]);
+
+  if(pm.status==='fulfilled') polyRaw=pm.value;
+  else console.warn('Polymarket failed:', pm.reason);
+
+  if(az.status==='fulfilled') azuroRaw=az.value;
+  else console.warn('Azuro failed:', az.reason);
+
+  if(!polyRaw.length && !azuroRaw.length){
+    setTbStatus('<div class="icon">⚠</div><div class="msg">Both exchanges failed to load.</div><div class="sub">Check Vercel function logs with <code>vercel logs</code></div>');
+    setPill('error','Error');
+  } else {
+    setPill('live','Live');
+    computeAll();
+    renderTab();
   }
-  btn.disabled = false; btn.classList.remove('spinning');
+
+  btn.disabled=false;
+  document.getElementById('rsvg').parentElement.classList.remove('spin');
+  refreshTimer=setTimeout(loadAll,60000);
 }
 
-function setStatus(html) {
-  document.getElementById('tbody').innerHTML = `<tr><td colspan="12"><div class="tbl-status">${html}</div></td></tr>`;
+async function fetchPolymarket(){
+  const LIMIT=500, MAX=4;
+  let all=[];
+  for(let p=0;p<MAX;p++){
+    const r=await fetch(`/api/markets?limit=${LIMIT}&offset=${p*LIMIT}`);
+    if(!r.ok) throw new Error(`Poly HTTP ${r.status}`);
+    const d=await r.json();
+    if(d.error) throw new Error(d.error);
+    if(!Array.isArray(d)||!d.length) break;
+    all=all.concat(d);
+    if(d.length<LIMIT) break;
+  }
+  return all;
 }
 
-function compute() {
-  const f = getFee(), now = Date.now();
-  computed = raw.map(m => {
-    let yes = null, no = null;
-    try {
-      let prices   = typeof m.outcomePrices === 'string' ? JSON.parse(m.outcomePrices) : m.outcomePrices;
-      let outcomes = typeof m.outcomes      === 'string' ? JSON.parse(m.outcomes)      : m.outcomes;
-      if (Array.isArray(prices) && prices.length === 2) {
-        const yi = Array.isArray(outcomes) ? outcomes.findIndex(o => o.toLowerCase() === 'yes') : -1;
-        const ni = Array.isArray(outcomes) ? outcomes.findIndex(o => o.toLowerCase() === 'no')  : -1;
-        yes = parseFloat(prices[yi !== -1 ? yi : 0]);
-        no  = parseFloat(prices[ni !== -1 ? ni : 1]);
+async function fetchAzuro(){
+  const r=await fetch('/api/azuro');
+  if(!r.ok) throw new Error(`Azuro HTTP ${r.status}`);
+  const d=await r.json();
+  if(d.error) throw new Error(d.error);
+  return Array.isArray(d)?d:[];
+}
+
+// ── COMPUTE ─────────────────────────────────────────────────────────────────
+function processMarket(m, source){
+  const f=getFee();
+  const now=Date.now();
+  let yes=null,no=null;
+  try{
+    let prices  =typeof m.outcomePrices==='string'?JSON.parse(m.outcomePrices):m.outcomePrices;
+    let outcomes=typeof m.outcomes     ==='string'?JSON.parse(m.outcomes)     :m.outcomes;
+    if(Array.isArray(prices)&&prices.length===2){
+      const yi=Array.isArray(outcomes)?outcomes.findIndex(o=>o.toLowerCase()==='yes'):-1;
+      const ni=Array.isArray(outcomes)?outcomes.findIndex(o=>o.toLowerCase()==='no') :-1;
+      yes=parseFloat(prices[yi!==-1?yi:0]);
+      no =parseFloat(prices[ni!==-1?ni:1]);
+    }
+  }catch(e){}
+  if(!yes||!no||isNaN(yes)||isNaN(no)||yes<=0||no<=0||yes>=1||no>=1)return null;
+
+  const fee=m.feeOverride!==undefined?m.feeOverride:f;
+  const cost=yes*(1+fee)+no*(1+fee);
+  const profit=1-cost;
+  const profitPct=(profit/cost)*100;
+  let days=null;
+  if(m.endDate) days=Math.max((new Date(m.endDate)-now)/86400000,0.01);
+  const apy=days?(profit/cost)*(365/days)*100:null;
+
+  return{
+    question:m.question||m.shortTitle||'—',slug:m.slug||'',source,
+    yes,no,cost,profit,profitPct,apy,days,
+    volume:parseFloat(m.volume||0),
+    isArb:profit>0,isNear:profit<=0&&profit>-0.01,
+    sport:m.sport||null,
+  };
+}
+
+function computeAll(){
+  const polyM = polyRaw.map(m=>processMarket(m,'poly')).filter(Boolean);
+  const azuroM = azuroRaw.map(m=>processMarket(m,'azuro')).filter(Boolean);
+  const crossM = findCrossExchangeArb(polyM, azuroM);
+
+  // store per-tab
+  window._tabs={
+    poly:  polyM,
+    azuro: azuroM,
+    cross: crossM,
+  };
+
+  // update counts
+  document.getElementById('cnt-poly').textContent  = polyM.length;
+  document.getElementById('cnt-azuro').textContent = azuroM.length;
+  document.getElementById('cnt-cross').textContent = crossM.length;
+  document.getElementById('s-pm').textContent      = polyM.length   || '—';
+  document.getElementById('s-az').textContent      = azuroM.length  || '—';
+  document.getElementById('s-fee').textContent     = (getFee()*100).toFixed(2)+'%';
+
+  const allArb=[...polyM,...azuroM,...crossM].filter(r=>r.isArb);
+  document.getElementById('s-arb').textContent  = allArb.length || '—';
+  document.getElementById('s-cross').textContent= crossM.filter(r=>r.isArb).length || '0';
+
+  const best=allArb.length?Math.max(...allArb.filter(r=>r.apy!=null).map(r=>r.apy)):null;
+  document.getElementById('s-best').textContent=best!=null?fmtAPY(best):'—';
+
+  computed=window._tabs[currentTab]||[];
+}
+
+// ── CROSS-EXCHANGE ARB ──────────────────────────────────────────────────────
+// Match Polymarket markets with Azuro markets by event name similarity
+function tokenize(s){
+  return s.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(w=>w.length>2);
+}
+function similarity(a,b){
+  const ta=new Set(tokenize(a)), tb=new Set(tokenize(b));
+  const inter=[...ta].filter(x=>tb.has(x)).length;
+  return inter/Math.max(ta.size,tb.size,1);
+}
+
+function findCrossExchangeArb(polyMs, azuroMs){
+  const f=getFee();
+  const results=[];
+
+  for(const pm of polyMs){
+    for(const az of azuroMs){
+      const sim=similarity(pm.question, az.question);
+      if(sim<0.3) continue; // not similar enough
+
+      // Try both combinations:
+      // 1. Buy YES on Poly, NO on Azuro
+      // 2. Buy NO on Poly, YES on Azuro
+      const combos=[
+        { yesPrice:pm.yes, noPrice:az.no,  yesEx:'Polymarket', noEx:'Azuro',  yesQ:pm.question, noQ:az.question },
+        { yesPrice:pm.no,  noPrice:az.yes, yesEx:'Polymarket', noEx:'Azuro',  yesQ:pm.question, noQ:az.question },
+        { yesPrice:az.yes, noPrice:pm.no,  yesEx:'Azuro',      noEx:'Poly',   yesQ:az.question, noQ:pm.question },
+        { yesPrice:az.no,  noPrice:pm.yes, yesEx:'Azuro',      noEx:'Poly',   yesQ:az.question, noQ:pm.question },
+      ];
+
+      for(const c of combos){
+        const cost=c.yesPrice*(1+f)+c.noPrice*(1+f);
+        const profit=1-cost;
+        const profitPct=(profit/cost)*100;
+        const days=pm.days||az.days||null;
+        const apy=days?(profit/cost)*(365/days)*100:null;
+
+        results.push({
+          question:`${pm.question}`,
+          matchedWith:az.question,
+          similarity:sim,
+          yesEx:c.yesEx, noEx:c.noEx,
+          yes:c.yesPrice, no:c.noPrice,
+          cost, profit, profitPct, apy, days,
+          volume:Math.max(pm.volume||0,az.volume||0),
+          source:'cross',
+          isArb:profit>0,isNear:profit<=0&&profit>-0.01,
+          slug:pm.slug||az.slug||'',
+        });
       }
-    } catch(e) {}
-    if (!yes || !no || isNaN(yes) || isNaN(no) || yes<=0 || no<=0 || yes>=1 || no>=1) return null;
-    const cost = yes*(1+f) + no*(1+f);
-    const profit = 1 - cost, profitPct = (profit/cost)*100;
-    let days = null;
-    if (m.endDate) days = Math.max((new Date(m.endDate)-now)/86400000, 0.1);
-    const apy = days ? (profit/cost)*(365/days)*100 : null;
-    return {
-      question: m.question||'—', slug: m.slug||'',
-      yes, no, cost, profit, profitPct, apy, days,
-      volume: parseFloat(m.volume||0),
-      isArb: profit>0, isNear: profit<=0&&profit>-0.01,
-    };
-  }).filter(Boolean);
+    }
+  }
+
+  // deduplicate — keep best profit per question pair
+  const seen=new Map();
+  for(const r of results){
+    const key=r.question+'|'+r.matchedWith;
+    if(!seen.has(key)||seen.get(key).profit<r.profit) seen.set(key,r);
+  }
+  return [...seen.values()].sort((a,b)=>(b.apy||0)-(a.apy||0));
 }
 
-function setFilter(f) {
-  cf = f;
-  ['all','arb','near'].forEach(k => document.getElementById('btn-'+k).classList.toggle('active', k===f));
-  render();
-}
-
-function sortBy(col) {
-  if (_sc===col) _sd*=-1; else { _sc=col; _sd=-1; }
-  document.querySelectorAll('thead th').forEach(th => {
-    th.classList.remove('sort-active');
-    const si = th.querySelector('.si'); if (si) si.textContent = '↕';
+// ── TAB ─────────────────────────────────────────────────────────────────────
+function setTab(tab){
+  currentTab=tab;
+  ['poly','azuro','cross'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('active',t===tab);
   });
-  const h = document.getElementById('h-'+col);
-  if (h) { h.classList.add('sort-active'); const si=h.querySelector('.si'); if(si) si.textContent=_sd===1?'↑':'↓'; }
+  document.getElementById('info-cross').style.display=tab==='cross'?'flex':'none';
+  computed=window._tabs?window._tabs[tab]||[]:[];
   render();
 }
 
-function render() {
-  let rows = computed;
-  if (cf==='arb')  rows = rows.filter(r=>r.isArb);
-  if (cf==='near') rows = rows.filter(r=>r.isNear);
-  rows = [...rows].sort((a,b) => {
+// ── FILTER + SORT ────────────────────────────────────────────────────────────
+function setFilter(f){
+  cf=f;
+  ['all','arb','near'].forEach(k=>document.getElementById('f-'+k).classList.toggle('on',k===f));
+  render();
+}
+
+function sortBy(col){
+  if(_sc===col)_sd*=-1; else{_sc=col;_sd=-1;}
+  document.querySelectorAll('thead th').forEach(th=>{
+    th.classList.remove('sa');
+    const si=th.querySelector('.si');if(si)si.textContent='↕';
+  });
+  const h=document.getElementById('h-'+col);
+  if(h){h.classList.add('sa');const si=h.querySelector('.si');if(si)si.textContent=_sd===1?'↑':'↓';}
+  render();
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
+function render(){
+  let rows=computed||[];
+  if(cf==='arb')  rows=rows.filter(r=>r.isArb);
+  if(cf==='near') rows=rows.filter(r=>r.isNear);
+  rows=[...rows].sort((a,b)=>{
     let av=a[_sc],bv=b[_sc];
-    if(av==null&&bv==null)return 0; if(av==null)return 1; if(bv==null)return -1;
+    if(av==null&&bv==null)return 0;if(av==null)return 1;if(bv==null)return -1;
     if(typeof av==='string')return av.localeCompare(bv)*_sd;
-    return (av-bv)*_sd;
+    return(av-bv)*_sd;
   });
 
-  const counts = { all:computed.length, arb:computed.filter(r=>r.isArb).length, near:computed.filter(r=>r.isNear).length };
-  document.getElementById('toolbar-note').textContent =
-    { all:`${counts.all} markets`, arb:`${counts.arb} arb opportunities`, near:`${counts.near} near-miss markets` }[cf];
+  const total=computed.length;
+  const nArb=computed.filter(r=>r.isArb).length;
+  const nNear=computed.filter(r=>r.isNear).length;
+  const labels={all:`${total} markets`,arb:`${nArb} arb opps`,near:`${nNear} near-miss`};
+  document.getElementById('tb-note').textContent=labels[cf];
 
-  const tbody = document.getElementById('tbody');
-  if (!rows.length) { setStatus('<div class="msg">No markets match this filter.</div>'); updateStats(); return; }
+  const tbody=document.getElementById('tbody');
+  if(!rows.length){
+    setTbStatus('<div class="msg">No markets match this filter.</div>');
+    return;
+  }
 
-  tbody.innerHTML = rows.map((r,i) => {
-    const ac = !r.apy?'apy-none':r.apy>30?'apy-high':r.apy>10?'apy-mid':r.apy>0?'apy-low':'apy-neg';
-    const as = r.apy!=null?(r.apy>0?'+':'')+r.apy.toFixed(1)+'%':'—';
-    const pCls = r.profit>=0?'profit-pos':'profit-neg';
-    const ps   = r.profit>=0?'+':'';
-    const badge = r.isArb
-      ? `<span class="badge badge-arb">✓ Arb</span>`
-      : `<span class="badge badge-miss">${(r.profit*100).toFixed(2)}¢ miss</span>`;
-    const ep  = r.isArb ? Math.min(100, r.profitPct*8) : 0;
-    const link = r.slug ? `https://polymarket.com/event/${r.slug}` : '#';
-    return `<tr>
+  tbody.innerHTML=rows.map((r,i)=>{
+    const ac=!r.apy?'az':r.apy>50?'ah':r.apy>10?'am':r.apy>0?'al':'an';
+    const pCls=r.profit>=0?'pp':'pn';
+    const ps=r.profit>=0?'+':'';
+    const ep=r.isArb?Math.min(100,r.profitPct*10):0;
+    const link=r.slug?`https://polymarket.com/event/${r.slug}`:'#';
+
+    let srcTag='';
+    if(r.source==='poly')   srcTag=`<span class="src-tag src-poly">Polymarket</span>`;
+    if(r.source==='azuro')  srcTag=`<span class="src-tag src-azuro">Azuro · BNB</span>`;
+    if(r.source==='cross')  srcTag=`<span class="src-tag src-cross">↔ Cross-Exchange</span>`;
+
+    let badge='';
+    if(r.source==='cross'&&r.isArb) badge=`<span class="badge b-cross">✓ Cross Arb</span>`;
+    else if(r.isArb) badge=`<span class="badge b-arb">✓ Arb</span>`;
+    else badge=`<span class="badge b-miss">${(r.profit*100).toFixed(2)}¢ miss</span>`;
+
+    let yesCell=`<td class="r p-yes">${(r.yes*100).toFixed(1)}¢`;
+    let noCell =`<td class="r p-no">${(r.no*100).toFixed(1)}¢`;
+    if(r.source==='cross'){
+      yesCell=`<td class="r p-yes">${(r.yes*100).toFixed(1)}¢<span class="cross-yes-src">${r.yesEx}</span>`;
+      noCell =`<td class="r p-no">${(r.no*100).toFixed(1)}¢<span class="cross-no-src">${r.noEx}</span>`;
+    }
+
+    return`<tr>
       <td class="td-rank">${i+1}</td>
-      <td class="td-market"><div class="mq"><a href="${link}" target="_blank" rel="noopener">${r.question}</a></div></td>
-      <td class="num price-yes">${(r.yes*100).toFixed(1)}¢</td>
-      <td class="num price-no">${(r.no*100).toFixed(1)}¢</td>
-      <td class="num price-cost">${(r.cost*100).toFixed(2)}¢</td>
-      <td class="num ${pCls}">${ps}${(r.profit*100).toFixed(2)}¢</td>
-      <td class="num ${pCls}">${ps}${r.profitPct.toFixed(3)}%</td>
-      <td class="num apy-cell ${ac}">${as}</td>
-      <td class="num td-days">${r.days!=null?r.days.toFixed(0)+'d':'—'}</td>
-      <td class="num td-vol">${fmtVol(r.volume)}</td>
+      <td class="td-mkt">
+        <div class="mkt-q"><a href="${link}" target="_blank" rel="noopener">${r.question}</a></div>
+        <div class="mkt-src">${srcTag}${r.sport?`<span style="font-size:.6rem;color:var(--t3)">${r.sport}</span>`:''}</div>
+      </td>
+      ${yesCell}</td>
+      ${noCell}</td>
+      <td class="r p-cost">${(r.cost*100).toFixed(2)}¢</td>
+      <td class="r ${pCls}">${ps}${(r.profit*100).toFixed(3)}¢</td>
+      <td class="r ${pCls}">${fmtPct(r.profitPct)}</td>
+      <td class="r apy ${ac}">${fmtAPY(r.apy)}</td>
+      <td class="r" style="font-family:var(--fm);font-size:.75rem;color:var(--t2)">${r.days!=null?r.days.toFixed(0)+'d':'—'}</td>
+      <td class="r" style="font-family:var(--fm);font-size:.75rem;color:var(--blue)">${fmtVol(r.volume)}</td>
       <td>${badge}</td>
       <td><div class="edge-bar"><div class="edge-fill" style="width:${ep}%"></div></div></td>
     </tr>`;
   }).join('');
-  updateStats();
 }
 
-function updateStats() {
-  document.getElementById('s-fee').textContent   = (getFee()*100).toFixed(2)+'%';
-  document.getElementById('s-total').textContent = computed.length||'—';
-  const arb = computed.filter(r=>r.isArb);
-  document.getElementById('s-arb').textContent   = arb.length||'—';
-  const best = arb.length ? Math.max(...arb.filter(r=>r.apy!=null).map(r=>r.apy)) : null;
-  document.getElementById('s-best').textContent  = best!=null?'+'+best.toFixed(1)+'%':'—';
-  const avg = arb.length ? arb.reduce((s,r)=>s+r.profitPct,0)/arb.length : null;
-  document.getElementById('s-avg').textContent   = avg!=null?'+'+avg.toFixed(3)+'%':'—';
-  const edge = arb.reduce((s,r)=>s+r.profit,0);
-  document.getElementById('s-edge').textContent  = arb.length?'$'+edge.toFixed(2):'—';
-}
-
-document.getElementById('fee').addEventListener('input', ()=>{ compute(); render(); });
+// ── INIT ─────────────────────────────────────────────────────────────────────
+document.getElementById('fee').addEventListener('input',()=>{computeAll();renderTab();});
+function renderTab(){computed=window._tabs?window._tabs[currentTab]||[]:[];render();}
 loadAll();
 </script>
 </body>
