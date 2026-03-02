@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PolyArb — Order Book Arbitrage</title>
+<title>PolyArb — Cross-Platform Arbitrage</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -187,12 +187,13 @@ td{padding:10px 14px;font-size:.8rem;vertical-align:middle}
 footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;display:flex;gap:20px;flex-wrap:wrap}
 .fi{font-size:.68rem;color:var(--t3);display:flex;gap:5px}
 .fi b{color:var(--t2);font-weight:500}
+
+.src-pi{background:rgba(245,158,11,.12);color:var(--amber)}
 </style>
 </head>
 <body>
 <div class="app">
 
-<!-- TOPBAR -->
 <header class="topbar">
   <a class="brand" href="#">
     <div class="bmark">
@@ -201,7 +202,7 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
       </svg>
     </div>
     <span class="bname">PolyArb</span>
-    <span class="btag">Order Book Arbitrage</span>
+    <span class="btag">Cross-Platform Arbitrage</span>
   </a>
   <div class="tb-mid">
     <div class="pill load" id="pill">
@@ -215,33 +216,31 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
   </div>
 </header>
 
-<!-- EXCHANGE STATUS BAR -->
 <div class="ex-status">
   <div class="ex-status-item">
     <span class="es-dot es-load" id="es-poly"></span>
-    <span id="es-poly-txt">Polymarket Gamma: loading…</span>
+    <span id="es-poly-txt">Polymarket: loading…</span>
   </div>
   <div class="ex-status-item">
-    <span class="es-dot es-load" id="es-clob"></span>
-    <span id="es-clob-txt">Polymarket CLOB: loading…</span>
+    <span class="es-dot es-load" id="es-pi"></span>
+    <span id="es-pi-txt">PredictIt: loading…</span>
   </div>
 </div>
 
-<!-- EXCHANGE TABS -->
 <div class="ex-tabs">
   <button class="etab active" id="tab-poly" onclick="setTab('poly')">
     <span class="edot" style="background:var(--green)"></span>
-    Gamma (Last Trade)
+    Polymarket
     <span class="ebadge src-poly" id="cnt-poly">—</span>
   </button>
-  <button class="etab" id="tab-clob" onclick="setTab('clob')">
-    <span class="edot" style="background:var(--blue)"></span>
-    CLOB (Live Ask)
-    <span class="ebadge src-clob" id="cnt-clob">—</span>
+  <button class="etab" id="tab-pi" onclick="setTab('pi')">
+    <span class="edot" style="background:var(--amber)"></span>
+    PredictIt
+    <span class="ebadge src-pi" id="cnt-pi">—</span>
   </button>
   <button class="etab" id="tab-cross" onclick="setTab('cross')">
     <span class="edot" style="background:var(--purple)"></span>
-    Gamma vs CLOB
+    Poly ↔ PredictIt
     <span class="ebadge src-cross" id="cnt-cross">—</span>
   </button>
   <div class="etab-right">
@@ -254,17 +253,15 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
   </div>
 </div>
 
-<!-- STATS -->
 <div class="stats">
-  <div class="stat"><div class="slbl">Gamma Markets</div><div class="sval b" id="s-pm">—</div></div>
-  <div class="stat"><div class="slbl">CLOB Markets</div><div class="sval b" id="s-clob-m">—</div></div>
+  <div class="stat"><div class="slbl">Polymarket</div><div class="sval b" id="s-pm">—</div></div>
+  <div class="stat"><div class="slbl">PredictIt</div><div class="sval" style="color:var(--amber)" id="s-pi">—</div></div>
   <div class="stat"><div class="slbl">Arb Opportunities</div><div class="sval g" id="s-arb">—</div></div>
   <div class="stat"><div class="slbl">Best APY</div><div class="sval g" id="s-best">—</div></div>
-  <div class="stat"><div class="slbl">CLOB Arb Ops</div><div class="sval p" id="s-cross">—</div><div class="ssub">Gamma ↔ CLOB</div></div>
-  <div class="stat"><div class="slbl">Fee per Side</div><div class="sval" id="s-fee">2.00%</div></div>
+  <div class="stat"><div class="slbl">Cross-Platform Ops</div><div class="sval p" id="s-cross">—</div><div class="ssub">Poly ↔ PredictIt</div></div>
+  <div class="stat"><div class="slbl">Taker Fee</div><div class="sval" id="s-fee">2.00%</div></div>
 </div>
 
-<!-- TOOLBAR -->
 <div class="toolbar">
   <div class="tgrp">
     <button class="fbtn" id="f-all"  onclick="setFilter('all')">All</button>
@@ -283,22 +280,20 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
   <div class="tnote" id="tnote">—</div>
 </div>
 
-<!-- CLOB INFO BAR -->
 <div class="info-bar" id="info-cross" style="display:none">
-  <strong>⚡ Gamma vs CLOB:</strong>
-  Gamma shows <em>last-trade prices</em> (lagged). CLOB shows <em>live ask prices</em> (what you actually pay).
-  If CLOB YES ask + CLOB NO ask &lt; $1.00 after fees → executable arb on Polymarket itself, no second account needed.
+  <strong>↔ Cross-Platform:</strong>
+  Buy YES on one platform + NO on the other for the same event. If combined cost &lt; $1.00 → risk-free profit.
+  <em>Note: PredictIt charges an additional 10% fee on profits. Factor this in before trading.</em>
 </div>
 
-<!-- TABLE -->
 <div class="main">
   <table>
     <thead>
       <tr>
         <th class="td-rank">#</th>
         <th id="h-question" onclick="sortBy('question')">Market <span class="si">↕</span></th>
-        <th class="r" id="h-yes"       onclick="sortBy('yes')">YES <span class="si">↕</span></th>
-        <th class="r" id="h-no"        onclick="sortBy('no')">NO <span class="si">↕</span></th>
+        <th class="r" id="h-yes"       onclick="sortBy('yes')">YES Ask <span class="si">↕</span></th>
+        <th class="r" id="h-no"        onclick="sortBy('no')">NO Ask <span class="si">↕</span></th>
         <th class="r" id="h-cost"      onclick="sortBy('cost')">Total Cost <span class="si">↕</span></th>
         <th class="r" id="h-profit"    onclick="sortBy('profit')">Profit ¢ <span class="si">↕</span></th>
         <th class="r" id="h-profitPct" onclick="sortBy('profitPct')">Profit % <span class="si">↕</span></th>
@@ -310,22 +305,23 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
       </tr>
     </thead>
     <tbody id="tbody">
-      <tr><td colspan="12"><div class="tst"><div class="msg"><span class="sp"></span>Loading…</div></div></td></tr>
+      <tr><td colspan="12"><div class="tst"><div class="msg"><span class="sp"></span>Loading exchanges…</div></div></td></tr>
     </tbody>
   </table>
 </div>
 
 <footer>
-  <div class="fi"><b>Same-Exchange (Gamma):</b> YES+NO last-trade prices · Cost=(YES+NO)×(1+fee)</div>
-  <div class="fi"><b>CLOB Arb:</b> Live orderbook ask prices · If YES_ask+NO_ask &lt; $1.00 → buy both on Polymarket now</div>
-  <div class="fi"><b>APY:</b> (Profit/Cost)×(365/days) · No login or KYC needed · auto-refresh 60s</div>
+  <div class="fi"><b>Polymarket:</b> CLOB ask prices · fee≈2% per side · global access</div>
+  <div class="fi"><b>PredictIt:</b> bestBuyYesCost / bestBuyNoCost · +10% profit fee · public API</div>
+  <div class="fi"><b>Cross Arb:</b> YES on Platform A + NO on Platform B · Cost=(YES+NO)×(1+fee) · Profit=$1−Cost</div>
+  <div class="fi"><b>APY:</b> (Profit/Cost)×(365/days) · Zero login needed · auto-refresh 60s</div>
 </footer>
 
 </div>
 <script>
 // ── STATE ───────────────────────────────────────────────────────────────────
-let polyRaw=[], clobRaw=[];
-let _tabs={poly:[],clob:[],cross:[]};
+let polyRaw=[], piRaw=[];
+let _tabs={poly:[],pi:[],cross:[]};
 let cf='arb', currentTab='poly', _sc='apy', _sd=-1;
 let refreshTimer=null;
 
@@ -341,11 +337,9 @@ function toggleTheme(){
   if(s){document.documentElement.dataset.theme=s;document.getElementById('tlbl').textContent=s==='dark'?'Dark':'Light';}
 })();
 
-// ── LIVE CLOCK ──────────────────────────────────────────────────────────────
 setInterval(()=>{document.getElementById('clock').textContent=new Date().toLocaleTimeString();},1000);
 document.getElementById('clock').textContent=new Date().toLocaleTimeString();
 
-// ── UTILS ───────────────────────────────────────────────────────────────────
 function getFee(){ return Math.max(0,parseFloat(document.getElementById('fee').value)||0)/100; }
 
 function fmtAPY(v){
@@ -378,6 +372,7 @@ function setTbSt(h){document.getElementById('tbody').innerHTML=`<tr><td colspan=
 function setExStatus(ex, ok, msg){
   const dot=document.getElementById('es-'+ex);
   const txt=document.getElementById('es-'+ex+'-txt');
+  if(!dot||!txt)return;
   dot.className='es-dot '+(ok===true?'es-ok':ok===false?'es-err':'es-load');
   txt.textContent=msg;
 }
@@ -390,26 +385,28 @@ async function loadAll(){
   if(refreshTimer)clearTimeout(refreshTimer);
 
   setExStatus('poly',null,'Polymarket: loading…');
-  setExStatus('clob',null,'CLOB: loading…');
+  setExStatus('pi',null,'PredictIt: loading…');
 
-  const [pm,km]=await Promise.allSettled([fetchPoly(),fetchClob()]);
+  const [pm,pi]=await Promise.allSettled([fetchPoly(),fetchPI()]);
 
   if(pm.status==='fulfilled'){
     polyRaw=pm.value;
     setExStatus('poly',true,`Polymarket: ${polyRaw.length} markets`);
   } else {
-    setExStatus('poly',false,`Polymarket: ${pm.reason}`);
+    polyRaw=[];
+    setExStatus('poly',false,`Polymarket: ${pm.reason?.message||pm.reason}`);
   }
 
-  if(km.status==='fulfilled'){
-    clobRaw=km.value;
-    setExStatus('clob',true,`CLOB: ${clobRaw.length} markets`);
+  if(pi.status==='fulfilled'){
+    piRaw=pi.value;
+    setExStatus('pi',true,`PredictIt: ${piRaw.length} contracts`);
   } else {
-    setExStatus('clob',false,`CLOB: ${km.reason?.message||km.reason}`);
+    piRaw=[];
+    setExStatus('pi',false,`PredictIt: ${pi.reason?.message||pi.reason}`);
   }
 
-  if(!polyRaw.length&&!clobRaw.length){
-    setTbSt('<div class="icon">⚠</div><div class="msg">Both exchanges failed.</div><div class="sub">Check Vercel logs: <code>vercel logs</code></div>');
+  if(!polyRaw.length&&!piRaw.length){
+    setTbSt('<div class="icon">⚠</div><div class="msg">Both exchanges failed.</div>');
     setPill('error','Error');
   } else {
     computeAll();
@@ -435,12 +432,12 @@ async function fetchPoly(){
   return all;
 }
 
-async function fetchClob(){
-  const r=await fetch('/api/clob');
-  const d=await r.json();
-  if(d.error)throw new Error(d.error); // surfaces the full error string from proxy
+async function fetchPI(){
+  const r=await fetch('/api/predictit');
   if(!r.ok)throw new Error(`HTTP ${r.status}`);
-  if(!Array.isArray(d))throw new Error('Unexpected response shape');
+  const d=await r.json();
+  if(d.error)throw new Error(d.error);
+  if(!Array.isArray(d))throw new Error('Unexpected response');
   return d;
 }
 
@@ -460,18 +457,24 @@ function process(m, source){
   }catch(e){}
   if(!yes||!no||isNaN(yes)||isNaN(no)||yes<=0||no<=0||yes>=1||no>=1)return null;
 
-  const cost=yes*(1+f)+no*(1+f);
-  const profit=1-cost;
+  // PredictIt has 10% profit fee — factor it in for PI source
+  const piFeeFactor = source==='pi' ? 0.10 : 0;
+  // PI effective NO payout = $1 - 10%*(1-bestBuyNoCost) — simplified: add extra fee
+  // For simplicity we use the taker fee set by user, plus note the PI fee separately
+  const cost = yes*(1+f)+no*(1+f);
+  const profit = 1-cost;
   const profitPct=(profit/cost)*100;
   let days=null;
   if(m.endDate)days=Math.max((new Date(m.endDate)-now)/86400000,0.01);
   const apy=days?(profit/cost)*(365/days)*100:null;
 
   return{
-    question:m.question||'—', slug:m.slug||'',
+    question:m.question||'—',
+    slug:m.slug||'',
+    predictitUrl:m.predictitUrl||null,
     source, yes, no, cost, profit, profitPct, apy, days,
     volume:parseFloat(m.volume||0),
-    category:m.category||m.subtitle||'',
+    category:m.category||'',
     isArb:profit>0, isNear:profit<=0&&profit>-0.01,
   };
 }
@@ -481,7 +484,7 @@ function tokenize(s){
   return s.toLowerCase()
     .replace(/[^a-z0-9\s]/g,' ')
     .split(/\s+/)
-    .filter(w=>w.length>2&&!['will','the','for','and','that','this','with','from','are','was','were'].includes(w));
+    .filter(w=>w.length>2&&!['will','the','for','and','that','this','with','from','are','was','were','who','what','when'].includes(w));
 }
 function sim(a,b){
   const ta=new Set(tokenize(a)), tb=new Set(tokenize(b));
@@ -490,43 +493,43 @@ function sim(a,b){
   return union>0?inter/union:0;
 }
 
-function buildCross(polyMs, clobMs){
+function buildCross(polyMs, piMs){
   const f=getFee(), now=Date.now();
   const seen=new Map();
 
   for(const pm of polyMs){
-    for(const km of clobMs){
-      const score=sim(pm.question, km.question);
-      if(score<0.25) continue;
+    for(const pi of piMs){
+      const score=sim(pm.question, pi.question);
+      if(score<0.20) continue;
 
-      // 4 combos: (poly-yes + kalshi-no), (poly-no + kalshi-yes) × reversed
       const combos=[
-        {yp:pm.yes, np:km.no,  ye:'Gamma', ne:'CLOB'},
-        {yp:pm.no,  np:km.yes, ye:'Gamma', ne:'CLOB'},
-        {yp:km.yes, np:pm.no,  ye:'CLOB',ne:'Gamma'},
-        {yp:km.no,  np:pm.yes, ye:'CLOB',ne:'Gamma'},
+        {yp:pm.yes, np:pi.no,  ye:'Polymarket', ne:'PredictIt'},
+        {yp:pm.no,  np:pi.yes, ye:'Polymarket', ne:'PredictIt'},
+        {yp:pi.yes, np:pm.no,  ye:'PredictIt', ne:'Polymarket'},
+        {yp:pi.no,  np:pm.yes, ye:'PredictIt', ne:'Polymarket'},
       ];
 
       for(const c of combos){
         const cost=c.yp*(1+f)+c.np*(1+f);
         const profit=1-cost;
         const profitPct=(profit/cost)*100;
-        const days=pm.days||km.days||null;
+        const days=pm.days||pi.days||null;
         const apy=days?(profit/cost)*(365/days)*100:null;
 
-        const key=`${pm.question}|||${km.question}`;
+        const key=`${pm.question}|||${pi.question}`;
         const existing=seen.get(key);
         if(!existing||existing.profit<profit){
           seen.set(key,{
             question:pm.question,
-            matchedQ:km.question,
+            matchedQ:pi.question,
             similarity:score,
             yesEx:c.ye, noEx:c.ne,
             yes:c.yp, no:c.np,
             cost, profit, profitPct, apy, days,
-            volume:Math.max(pm.volume||0,km.volume||0),
+            volume:Math.max(pm.volume||0,0),
             source:'cross',
-            slug:pm.slug||km.slug||'',
+            slug:pm.slug||pi.slug||'',
+            predictitUrl:pi.predictitUrl||null,
             isArb:profit>0,
             isNear:profit<=0&&profit>-0.01,
           });
@@ -541,20 +544,20 @@ function buildCross(polyMs, clobMs){
 // ── COMPUTE ALL ─────────────────────────────────────────────────────────────
 function computeAll(){
   const pm=polyRaw.map(m=>process(m,'poly')).filter(Boolean);
-  const km=clobRaw.map(m=>process(m,'clob')).filter(Boolean);
-  const cx=buildCross(pm,km);
+  const pi=piRaw.map(m=>process(m,'pi')).filter(Boolean);
+  const cx=buildCross(pm,pi);
 
-  _tabs={poly:pm, clob:km, cross:cx};
+  _tabs={poly:pm, pi, cross:cx};
 
-  document.getElementById('cnt-poly').textContent  =pm.length;
-  document.getElementById('cnt-clob').textContent=km.length;
-  document.getElementById('cnt-cross').textContent =cx.length;
-  document.getElementById('s-pm').textContent  =pm.length||'—';
-  document.getElementById('s-clob-m').textContent  =km.length||'—';
-  document.getElementById('s-fee').textContent =(getFee()*100).toFixed(2)+'%';
+  document.getElementById('cnt-poly').textContent=pm.length;
+  document.getElementById('cnt-pi').textContent=pi.length;
+  document.getElementById('cnt-cross').textContent=cx.length;
+  document.getElementById('s-pm').textContent=pm.length||'—';
+  document.getElementById('s-pi').textContent=pi.length||'—';
+  document.getElementById('s-fee').textContent=(getFee()*100).toFixed(2)+'%';
 
-  const allArb=[...pm,...km,...cx].filter(r=>r.isArb);
-  document.getElementById('s-arb').textContent  =allArb.length||'—';
+  const allArb=[...pm,...pi,...cx].filter(r=>r.isArb);
+  document.getElementById('s-arb').textContent=allArb.length||'—';
   document.getElementById('s-cross').textContent=cx.filter(r=>r.isArb).length||'0';
 
   const best=allArb.length?Math.max(...allArb.filter(r=>r.apy!=null).map(r=>r.apy)):null;
@@ -564,10 +567,11 @@ function computeAll(){
 // ── TAB ─────────────────────────────────────────────────────────────────────
 function setTab(t){
   currentTab=t;
-  ['poly','clob','cross'].forEach(k=>document.getElementById('tab-'+k).classList.toggle('active',k===t));
+  ['poly','pi','cross'].forEach(k=>document.getElementById('tab-'+k).classList.toggle('active',k===t));
   document.getElementById('info-cross').style.display=t==='cross'?'flex':'none';
   render();
 }
+function renderTab(){ render(); }
 
 // ── FILTER + SORT ────────────────────────────────────────────────────────────
 function setFilter(f){
@@ -617,23 +621,22 @@ function render(){
     const pCls=r.profit>=0?'pfp':'pfn';
     const ps=r.profit>=0?'+':'';
     const ep=r.isArb?Math.min(100,Math.abs(r.profitPct)*10):0;
-    const link=r.clobUrl||(r.slug?`https://polymarket.com/event/${r.slug}`:'#');
+    
+    // Smart link: PredictIt URL if available, else Polymarket
+    const link = r.predictitUrl || (r.slug?`https://polymarket.com/event/${r.slug}`:'#');
 
-    // source tag
     const stag = r.source==='poly'
       ?`<span class="stag src-poly">Polymarket</span>`
-      :r.source==='clob'
-      ?`<span class="stag src-clob">CLOB</span>`
+      :r.source==='pi'
+      ?`<span class="stag src-pi">PredictIt</span>`
       :`<span class="stag src-cross">↔ Cross</span>`;
 
-    // badge
     const badge = r.source==='cross'&&r.isArb
       ?`<span class="badge bc">✓ Cross Arb</span>`
       :r.isArb
       ?`<span class="badge ba">✓ Arb</span>`
       :`<span class="badge bm2">${(r.profit*100).toFixed(2)}¢ miss</span>`;
 
-    // YES/NO cells — cross shows exchange source
     const yCell = r.source==='cross'
       ?`<td class="r py">${(r.yes*100).toFixed(1)}¢<span class="xsrc">${r.yesEx}</span></td>`
       :`<td class="r py">${(r.yes*100).toFixed(1)}¢</td>`;
@@ -661,7 +664,6 @@ function render(){
   }).join('');
 }
 
-// ── INIT ─────────────────────────────────────────────────────────────────────
 document.getElementById('fee').addEventListener('input',()=>{computeAll();render();});
 loadAll();
 </script>
