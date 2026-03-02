@@ -73,7 +73,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
 .edot{width:7px;height:7px;border-radius:50%}
 .ebadge{font-size:.63rem;font-weight:600;padding:1px 6px;border-radius:3px}
 .src-poly  {background:rgba(38,166,154,.15);color:var(--green)}
-.src-kalshi{background:var(--bbg);color:var(--blue)}
+.src-opinion{background:var(--bbg);color:var(--blue)}
 .src-cross {background:var(--pbg);color:var(--purple)}
 .etab-right{margin-left:auto;display:flex;align-items:center;gap:8px}
 
@@ -222,8 +222,8 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
     <span id="es-poly-txt">Polymarket: loading…</span>
   </div>
   <div class="ex-status-item">
-    <span class="es-dot es-load" id="es-kalshi"></span>
-    <span id="es-kalshi-txt">Kalshi: loading…</span>
+    <span class="es-dot es-load" id="es-opinion"></span>
+    <span id="es-opinion-txt">Opinion: loading…</span>
   </div>
 </div>
 
@@ -234,10 +234,10 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
     Polymarket
     <span class="ebadge src-poly" id="cnt-poly">—</span>
   </button>
-  <button class="etab" id="tab-kalshi" onclick="setTab('kalshi')">
+  <button class="etab" id="tab-opinion" onclick="setTab('opinion')">
     <span class="edot" style="background:var(--blue)"></span>
-    Kalshi
-    <span class="ebadge src-kalshi" id="cnt-kalshi">—</span>
+    Opinion
+    <span class="ebadge src-opinion" id="cnt-opinion">—</span>
   </button>
   <button class="etab" id="tab-cross"  onclick="setTab('cross')">
     <span class="edot" style="background:var(--purple)"></span>
@@ -257,10 +257,10 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
 <!-- STATS -->
 <div class="stats">
   <div class="stat"><div class="slbl">Poly Markets</div><div class="sval b" id="s-pm">—</div></div>
-  <div class="stat"><div class="slbl">Kalshi Markets</div><div class="sval b" id="s-km">—</div></div>
+  <div class="stat"><div class="slbl">Opinion Markets</div><div class="sval b" id="s-om">—</div></div>
   <div class="stat"><div class="slbl">Arb Opportunities</div><div class="sval g" id="s-arb">—</div></div>
   <div class="stat"><div class="slbl">Best APY</div><div class="sval g" id="s-best">—</div></div>
-  <div class="stat"><div class="slbl">Cross-Exchange Ops</div><div class="sval p" id="s-cross">—</div><div class="ssub">Poly ↔ Kalshi</div></div>
+  <div class="stat"><div class="slbl">Cross-Exchange Ops</div><div class="sval p" id="s-cross">—</div><div class="ssub">Poly ↔ Opinion</div></div>
   <div class="stat"><div class="slbl">Fee per Side</div><div class="sval" id="s-fee">2.00%</div></div>
 </div>
 
@@ -286,8 +286,16 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
 <!-- CROSS INFO BAR -->
 <div class="info-bar" id="info-cross" style="display:none">
   <strong>⚡ Cross-Exchange:</strong>
-  Buy YES on Polymarket + NO on Kalshi (or vice versa) for matched events. If total cost &lt; $1.00 after fees → risk-free profit.
+  Buy YES on Polymarket + NO on Opinion (or vice versa) for matched events. If total cost &lt; $1.00 after fees → risk-free profit.
   Events matched by title similarity.
+</div>
+
+
+<!-- OPINION API KEY NOTICE -->
+<div class="info-bar" id="info-apikey" style="background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.2)">
+  <strong style="color:var(--amber)">⚙ Opinion API Key Required:</strong>
+  Get a free key at <a href="https://docs.google.com/forms/d/1h7gp8UffZeXzYQ-lv4jcou9PoRNOqMAQhyW4IwZDnII" target="_blank" style="color:var(--amber)">opinion.trade API form</a>,
+  then add it in Vercel: <strong style="color:var(--amber)">Settings → Environment Variables → OPINION_API_KEY</strong> → Redeploy.
 </div>
 
 <!-- TABLE -->
@@ -317,15 +325,15 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
 
 <footer>
   <div class="fi"><b>Same-Exchange:</b> YES+NO same market · Cost=(YES+NO)×(1+fee) · Profit=$1−Cost</div>
-  <div class="fi"><b>Cross-Exchange:</b> YES on Poly + NO on Kalshi · matched by event title similarity</div>
-  <div class="fi"><b>APY:</b> (Profit/Cost)×(365/days) · Polymarket fee≈2% · Kalshi fee≈1%</div>
+  <div class="fi"><b>Cross-Exchange:</b> YES on Poly + NO on Opinion · matched by event title similarity</div>
+  <div class="fi"><b>APY:</b> (Profit/Cost)×(365/days) · Polymarket fee≈2% · Opinion fee≈1%</div>
 </footer>
 
 </div>
 <script>
 // ── STATE ───────────────────────────────────────────────────────────────────
-let polyRaw=[], kalshiRaw=[];
-let _tabs={poly:[],kalshi:[],cross:[]};
+let polyRaw=[], opinionRaw=[];
+let _tabs={poly:[],opinion:[],cross:[]};
 let cf='arb', currentTab='poly', _sc='apy', _sd=-1;
 let refreshTimer=null;
 
@@ -390,9 +398,9 @@ async function loadAll(){
   if(refreshTimer)clearTimeout(refreshTimer);
 
   setExStatus('poly',null,'Polymarket: loading…');
-  setExStatus('kalshi',null,'Kalshi: loading…');
+  setExStatus('opinion',null,'Opinion: loading…');
 
-  const [pm,km]=await Promise.allSettled([fetchPoly(),fetchKalshi()]);
+  const [pm,km]=await Promise.allSettled([fetchPoly(),fetchOpinion()]);
 
   if(pm.status==='fulfilled'){
     polyRaw=pm.value;
@@ -402,13 +410,13 @@ async function loadAll(){
   }
 
   if(km.status==='fulfilled'){
-    kalshiRaw=km.value;
-    setExStatus('kalshi',true,`Kalshi: ${kalshiRaw.length} markets`);
+    opinionRaw=km.value;
+    setExStatus('opinion',true,`Opinion: ${opinionRaw.length} markets`);
   } else {
-    setExStatus('kalshi',false,`Kalshi: ${km.reason?.message||km.reason}`);
+    setExStatus('opinion',false,`Opinion: ${km.reason?.message||km.reason}`);
   }
 
-  if(!polyRaw.length&&!kalshiRaw.length){
+  if(!polyRaw.length&&!opinionRaw.length){
     setTbSt('<div class="icon">⚠</div><div class="msg">Both exchanges failed.</div><div class="sub">Check Vercel logs: <code>vercel logs</code></div>');
     setPill('error','Error');
   } else {
@@ -435,8 +443,8 @@ async function fetchPoly(){
   return all;
 }
 
-async function fetchKalshi(){
-  const r=await fetch('/api/kalshi');
+async function fetchOpinion(){
+  const r=await fetch('/api/opinion');
   const d=await r.json();
   if(d.error)throw new Error(d.error); // surfaces the full error string from proxy
   if(!r.ok)throw new Error(`HTTP ${r.status}`);
@@ -490,21 +498,21 @@ function sim(a,b){
   return union>0?inter/union:0;
 }
 
-function buildCross(polyMs, kalshiMs){
+function buildCross(polyMs, opinionMs){
   const f=getFee(), now=Date.now();
   const seen=new Map();
 
   for(const pm of polyMs){
-    for(const km of kalshiMs){
+    for(const km of opinionMs){
       const score=sim(pm.question, km.question);
       if(score<0.25) continue;
 
-      // 4 combos: (poly-yes + kalshi-no), (poly-no + kalshi-yes) × reversed
+      // 4 combos: (poly-yes + opinion-no), (poly-no + opinion-yes) × reversed
       const combos=[
-        {yp:pm.yes, np:km.no,  ye:'Poly', ne:'Kalshi'},
-        {yp:pm.no,  np:km.yes, ye:'Poly', ne:'Kalshi'},
-        {yp:km.yes, np:pm.no,  ye:'Kalshi',ne:'Poly'},
-        {yp:km.no,  np:pm.yes, ye:'Kalshi',ne:'Poly'},
+        {yp:pm.yes, np:km.no,  ye:'Poly', ne:'Opinion'},
+        {yp:pm.no,  np:km.yes, ye:'Poly', ne:'Opinion'},
+        {yp:km.yes, np:pm.no,  ye:'Opinion',ne:'Poly'},
+        {yp:km.no,  np:pm.yes, ye:'Opinion',ne:'Poly'},
       ];
 
       for(const c of combos){
@@ -541,16 +549,16 @@ function buildCross(polyMs, kalshiMs){
 // ── COMPUTE ALL ─────────────────────────────────────────────────────────────
 function computeAll(){
   const pm=polyRaw.map(m=>process(m,'poly')).filter(Boolean);
-  const km=kalshiRaw.map(m=>process(m,'kalshi')).filter(Boolean);
+  const km=opinionRaw.map(m=>process(m,'opinion')).filter(Boolean);
   const cx=buildCross(pm,km);
 
-  _tabs={poly:pm, kalshi:km, cross:cx};
+  _tabs={poly:pm, opinion:km, cross:cx};
 
   document.getElementById('cnt-poly').textContent  =pm.length;
-  document.getElementById('cnt-kalshi').textContent=km.length;
+  document.getElementById('cnt-opinion').textContent=km.length;
   document.getElementById('cnt-cross').textContent =cx.length;
   document.getElementById('s-pm').textContent  =pm.length||'—';
-  document.getElementById('s-km').textContent  =km.length||'—';
+  document.getElementById('s-om').textContent  =km.length||'—';
   document.getElementById('s-fee').textContent =(getFee()*100).toFixed(2)+'%';
 
   const allArb=[...pm,...km,...cx].filter(r=>r.isArb);
@@ -564,7 +572,7 @@ function computeAll(){
 // ── TAB ─────────────────────────────────────────────────────────────────────
 function setTab(t){
   currentTab=t;
-  ['poly','kalshi','cross'].forEach(k=>document.getElementById('tab-'+k).classList.toggle('active',k===t));
+  ['poly','opinion','cross'].forEach(k=>document.getElementById('tab-'+k).classList.toggle('active',k===t));
   document.getElementById('info-cross').style.display=t==='cross'?'flex':'none';
   render();
 }
@@ -617,13 +625,13 @@ function render(){
     const pCls=r.profit>=0?'pfp':'pfn';
     const ps=r.profit>=0?'+':'';
     const ep=r.isArb?Math.min(100,Math.abs(r.profitPct)*10):0;
-    const link=r.slug?`https://polymarket.com/event/${r.slug}`:'#';
+    const link=r.opinionUrl||(r.slug?`https://polymarket.com/event/${r.slug}`:'#');
 
     // source tag
     const stag = r.source==='poly'
       ?`<span class="stag src-poly">Polymarket</span>`
-      :r.source==='kalshi'
-      ?`<span class="stag src-kalshi">Kalshi</span>`
+      :r.source==='opinion'
+      ?`<span class="stag src-opinion">Opinion</span>`
       :`<span class="stag src-cross">↔ Cross</span>`;
 
     // badge
