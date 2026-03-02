@@ -19,6 +19,7 @@
     background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,255,136,.013) 3px,rgba(0,255,136,.013) 4px)}
   .shell{max-width:1480px;margin:0 auto;padding:20px 24px}
 
+  /* HEADER */
   .hdr{display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid var(--bb);margin-bottom:20px;flex-wrap:wrap;gap:12px}
   .logo-row{display:flex;align-items:baseline;gap:14px}
   .logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:2.1rem;letter-spacing:.08em;color:var(--g);text-shadow:0 0 20px var(--gg),0 0 60px rgba(0,255,136,.1)}
@@ -29,6 +30,7 @@
   @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
   .ts{font-size:.57rem;color:var(--td)}
 
+  /* EXPLAINER */
   .exp{background:linear-gradient(135deg,rgba(0,255,136,.05),rgba(0,255,136,.02));border:1px solid rgba(0,255,136,.18);
     padding:14px 18px;margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
   @media(max-width:680px){.exp{grid-template-columns:1fr}}
@@ -36,6 +38,7 @@
   .ex strong{color:var(--g);font-size:.67rem;display:block;margin-bottom:3px;letter-spacing:.1em}
   .ex .f{color:var(--am);font-size:.63rem}
 
+  /* STATS */
   .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--b);border:1px solid var(--b);margin-bottom:20px}
   @media(max-width:780px){.stats{grid-template-columns:repeat(3,1fr)}}
   .st{background:var(--surface);padding:12px 16px}
@@ -43,6 +46,7 @@
   .stv{font-size:1.35rem;font-weight:700;color:var(--g);line-height:1}
   .stv.a{color:var(--am)}.stv.b{color:var(--bl)}
 
+  /* CONTROLS */
   .ctrl{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
   .fw{display:flex;align-items:center;gap:8px}
   .cl{font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--td)}
@@ -57,6 +61,7 @@
   .sep{color:var(--mu);font-size:.8rem}
   .nt{font-size:.57rem;color:var(--td);margin-left:auto}
 
+  /* TABLE */
   .tw{overflow-x:auto}
   table{width:100%;border-collapse:collapse}
   thead th{background:var(--surface);padding:9px 13px;text-align:left;font-size:.54rem;
@@ -94,12 +99,13 @@
   .ba{background:rgba(0,255,136,.14);color:var(--g);border:1px solid rgba(0,255,136,.28)}
   .bm{background:rgba(255,64,85,.1);color:var(--rd);border:1px solid rgba(255,64,85,.22)}
 
+  /* status */
   .sbox{text-align:center;padding:60px 20px;font-size:.72rem;color:var(--td)}
   .spin{display:inline-block;width:14px;height:14px;border:2px solid var(--bb);border-top-color:var(--g);
     border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .etxt{color:var(--rd);font-size:.78rem}
-  .stxt{font-size:.62rem;color:var(--td);margin-top:10px;line-height:1.8}
+  .etxt{color:var(--rd)}
+  .stxt{font-size:.6rem;color:var(--td);margin-top:10px;line-height:1.8}
 
   footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--b);font-size:.55rem;color:var(--td);line-height:2.1}
   footer b{color:var(--mu)}
@@ -161,7 +167,7 @@
     </div>
     <span class="sep">|</span>
     <button class="btn" id="btn-all"  onclick="setFilter('all')">All</button>
-    <button class="btn on" id="btn-arb" onclick="setFilter('arb')">Arb Only</button>
+    <button class="btn on" id="btn-arb"  onclick="setFilter('arb')">Arb Only</button>
     <button class="btn" id="btn-near" onclick="setFilter('near')">Near-Miss (&lt;1¢)</button>
     <span class="sep">|</span>
     <button class="btn" id="btn-refresh" onclick="loadAll()">↻ Refresh</button>
@@ -195,13 +201,15 @@
   <footer>
     <b>LOGIC</b> — Cost=(YES+NO)×(1+fee_per_side) · Profit=$1.00−Cost · APY annualizes by days to resolution<br>
     <b>RISKS</b> — Slippage & partial fills can kill edge. Execute both legs simultaneously.<br>
-    <b>DATA</b> — Live via <code>/api/markets</code> (Vercel serverless → Polymarket Gamma API). Auto-refreshes every 60s.
+    <b>DATA</b> — Live via <code>/api/markets</code> (server-side proxy → Polymarket Gamma API). Auto-refreshes every 60s.
   </footer>
 </div>
 
 <script>
+// ── Calls our own /api/markets — runs server-side on Vercel, no CORS ────────
 const LIMIT = 500;
 const MAX_PAGES = 4;
+
 let raw = [], computed = [], cf = 'arb', _sc = 'apy', _sd = -1;
 let refreshTimer = null;
 
@@ -218,7 +226,7 @@ async function loadAll() {
     let all = [];
     for (let page = 0; page < MAX_PAGES; page++) {
       const offset = page * LIMIT;
-      setStatus(`<span class="spin"></span>Page ${page+1} of ${MAX_PAGES}… (${all.length} markets)`);
+      setStatus(`<span class="spin"></span>Page ${page+1} of ${MAX_PAGES}… (${all.length} markets loaded)`);
       const res = await fetch(`/api/markets?limit=${LIMIT}&offset=${offset}`);
       if (!res.ok) throw new Error(`Server error ${res.status}`);
       const data = await res.json();
@@ -227,7 +235,9 @@ async function loadAll() {
       all = all.concat(data);
       if (data.length < LIMIT) break;
     }
+
     if (!all.length) throw new Error('No market data returned');
+
     raw = all;
     compute();
     render();
@@ -235,7 +245,7 @@ async function loadAll() {
     document.getElementById('live-label').textContent = 'LIVE';
     refreshTimer = setTimeout(loadAll, 60000);
   } catch (e) {
-    setStatus(`<div class="etxt">⚠ ${e.message}</div><div class="stxt">Check Vercel function logs at <code>vercel logs</code> for details.</div>`);
+    setStatus(`<div class="etxt">⚠ ${e.message}</div><div class="stxt">Check that your Vercel deployment is live and <code>/api/markets</code> is reachable.</div>`);
     document.getElementById('live-label').textContent = 'ERROR';
   }
   btn.disabled = false;
@@ -254,12 +264,18 @@ function compute() {
       let prices   = typeof m.outcomePrices === 'string' ? JSON.parse(m.outcomePrices) : m.outcomePrices;
       let outcomes = typeof m.outcomes      === 'string' ? JSON.parse(m.outcomes)      : m.outcomes;
       if (Array.isArray(prices) && prices.length === 2) {
-        const yi = Array.isArray(outcomes) ? outcomes.findIndex(o => o.toLowerCase() === 'yes') : -1;
-        const ni = Array.isArray(outcomes) ? outcomes.findIndex(o => o.toLowerCase() === 'no')  : -1;
-        yes = parseFloat(prices[yi !== -1 ? yi : 0]);
-        no  = parseFloat(prices[ni !== -1 ? ni : 1]);
+        if (Array.isArray(outcomes) && outcomes.length === 2) {
+          const yi = outcomes.findIndex(o => o.toLowerCase() === 'yes');
+          const ni = outcomes.findIndex(o => o.toLowerCase() === 'no');
+          yes = parseFloat(prices[yi !== -1 ? yi : 0]);
+          no  = parseFloat(prices[ni !== -1 ? ni : 1]);
+        } else {
+          yes = parseFloat(prices[0]);
+          no  = parseFloat(prices[1]);
+        }
       }
     } catch(e) {}
+
     if (!yes || !no || isNaN(yes) || isNaN(no)) return null;
     if (yes <= 0 || no <= 0 || yes >= 1 || no >= 1) return null;
 
@@ -271,17 +287,19 @@ function compute() {
     const apy = days ? (profit / cost) * (365 / days) * 100 : null;
 
     return {
-      question: m.question || '—', slug: m.slug || '',
+      question: m.question || '—',
+      slug: m.slug || '',
       yes, no, cost, profit, profitPct, apy, days,
       volume: parseFloat(m.volume || 0),
-      isArb: profit > 0, isNear: profit <= 0 && profit > -0.01,
+      isArb:  profit > 0,
+      isNear: profit <= 0 && profit > -0.01,
     };
   }).filter(Boolean);
 }
 
 function setFilter(f) {
   cf = f;
-  ['all','arb','near'].forEach(k => document.getElementById('btn-'+k).classList.toggle('on', k===f));
+  ['all','arb','near'].forEach(k => document.getElementById('btn-'+k).classList.toggle('on', k === f));
   render();
 }
 
@@ -323,9 +341,12 @@ function render() {
     const as  = r.apy != null ? (r.apy>0?'+':'')+r.apy.toFixed(1)+'%' : '—';
     const ps  = r.profit >= 0 ? '+' : '';
     const pc  = r.profit >= 0 ? 'pos' : 'neg';
-    const badge = r.isArb ? `<span class="badge ba">ARB ✓</span>` : `<span class="badge bm">MISS ${(r.profit*100).toFixed(2)}¢</span>`;
+    const badge = r.isArb
+      ? `<span class="badge ba">ARB ✓</span>`
+      : `<span class="badge bm">MISS ${(r.profit*100).toFixed(2)}¢</span>`;
     const cp  = r.isArb ? Math.min(100, r.profitPct * 6) : 0;
     const link = r.slug ? `https://polymarket.com/event/${r.slug}` : '#';
+
     return `<tr>
       <td class="rk">${i+1}</td>
       <td><div class="mq"><a href="${link}" target="_blank" rel="noopener">${r.question}</a></div></td>
@@ -345,7 +366,8 @@ function render() {
 }
 
 function updateStats() {
-  document.getElementById('s-fee').textContent   = (getFee()*100).toFixed(1)+'%';
+  const f = getFee();
+  document.getElementById('s-fee').textContent   = (f*100).toFixed(1)+'%';
   document.getElementById('s-total').textContent = computed.length;
   const arb = computed.filter(r=>r.isArb);
   document.getElementById('s-arb').textContent   = arb.length;
