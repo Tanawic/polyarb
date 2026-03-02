@@ -7,27 +7,25 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ── TOKENS ── */
 :root {
-  --radius: 4px;
-  --tr: 160ms ease;
-  --green:  #26a69a; --green-bg: rgba(38,166,154,.12); --green-dim: rgba(38,166,154,.06);
-  --red:    #ef5350; --red-bg:   rgba(239,83,80,.1);
-  --amber:  #f59e0b; --amber-bg: rgba(245,158,11,.1);
-  --blue:   #3b82f6; --blue-bg:  rgba(59,130,246,.1);
-  --purple: #8b5cf6; --purple-bg:rgba(139,92,246,.1);
-  --fb: 'IBM Plex Sans', system-ui, sans-serif;
-  --fm: 'IBM Plex Mono', monospace;
+  --r: 4px; --tr: 160ms ease;
+  --green:#26a69a; --gbg:rgba(38,166,154,.12); --gdim:rgba(38,166,154,.06);
+  --red:#ef5350;   --rbg:rgba(239,83,80,.1);
+  --amber:#f59e0b; --abg:rgba(245,158,11,.1);
+  --blue:#3b82f6;  --bbg:rgba(59,130,246,.1);
+  --purple:#8b5cf6;--pbg:rgba(139,92,246,.1);
+  --fb:'IBM Plex Sans',system-ui,sans-serif;
+  --fm:'IBM Plex Mono',monospace;
 }
-[data-theme="dark"] {
-  --bg:#131722; --panel:#1e222d; --hover:#262b38; --input:#2a2f3e;
-  --b:#2a2f3e; --bm:#363c4e; --t1:#d1d4dc; --t2:#787b86; --t3:#4c525e;
-  --shadow: 0 1px 4px rgba(0,0,0,.5);
+[data-theme="dark"]{
+  --bg:#131722;--panel:#1e222d;--hover:#262b38;--inp:#2a2f3e;
+  --b:#2a2f3e;--bm:#363c4e;--t1:#d1d4dc;--t2:#787b86;--t3:#4c525e;
+  --sh:0 1px 4px rgba(0,0,0,.5);
 }
-[data-theme="light"] {
-  --bg:#f0f3fa; --panel:#ffffff; --hover:#f4f6fb; --input:#edf0f7;
-  --b:#e1e4ed; --bm:#cdd0db; --t1:#131722; --t2:#5d6170; --t3:#9598a1;
-  --shadow: 0 1px 4px rgba(0,0,0,.07);
+[data-theme="light"]{
+  --bg:#f0f3fa;--panel:#ffffff;--hover:#f4f6fb;--inp:#edf0f7;
+  --b:#e1e4ed;--bm:#cdd0db;--t1:#131722;--t2:#5d6170;--t3:#9598a1;
+  --sh:0 1px 4px rgba(0,0,0,.07);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:14px}
@@ -35,114 +33,104 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
   -webkit-font-smoothing:antialiased;transition:background var(--tr),color var(--tr)}
 .app{display:flex;flex-direction:column;min-height:100vh}
 
-/* ── TOPBAR ── */
-.topbar{
-  height:52px;background:var(--panel);border-bottom:1px solid var(--b);
+/* TOPBAR */
+.topbar{height:52px;background:var(--panel);border-bottom:1px solid var(--b);
   display:flex;align-items:center;padding:0 20px;gap:14px;
-  position:sticky;top:0;z-index:200;box-shadow:var(--shadow);
-}
+  position:sticky;top:0;z-index:200;box-shadow:var(--sh)}
 .brand{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0}
-.brand-mark{width:28px;height:28px;background:var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center}
-.brand-mark svg{width:16px;height:16px}
-.brand-name{font-family:var(--fm);font-weight:600;font-size:.92rem;color:var(--t1)}
-.brand-tag{font-size:.68rem;color:var(--t3)}
+.bmark{width:28px;height:28px;background:var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center}
+.bmark svg{width:16px;height:16px}
+.bname{font-family:var(--fm);font-weight:600;font-size:.92rem;color:var(--t1)}
+.btag{font-size:.68rem;color:var(--t3)}
 .tb-mid{flex:1;display:flex;align-items:center;gap:10px}
-.pill{display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:500;border:1px solid transparent;transition:all var(--tr)}
-.pill.live   {color:var(--green);background:var(--green-dim);border-color:rgba(38,166,154,.25)}
-.pill.error  {color:var(--red);  background:var(--red-bg);   border-color:rgba(239,83,80,.25)}
-.pill.loading{color:var(--t2);   background:var(--input);    border-color:var(--b)}
-.pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
-.pill.live .pill-dot{animation:blink 2s ease-in-out infinite}
+.pill{display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;
+  font-size:.7rem;font-weight:500;border:1px solid transparent;transition:all var(--tr)}
+.pill.live  {color:var(--green);background:var(--gdim);border-color:rgba(38,166,154,.25)}
+.pill.error {color:var(--red);  background:var(--rbg); border-color:rgba(239,83,80,.25)}
+.pill.load  {color:var(--t2);   background:var(--inp);  border-color:var(--b)}
+.pdot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.live .pdot{animation:blink 2s ease-in-out infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.tb-clock{font-family:var(--fm);font-size:.7rem;color:var(--t3)}
+.clock{font-family:var(--fm);font-size:.7rem;color:var(--t3);min-width:80px}
 .tb-right{display:flex;align-items:center;gap:8px;margin-left:auto}
-.theme-lbl{font-size:.7rem;color:var(--t3)}
-.theme-toggle{width:36px;height:20px;background:var(--bm);border-radius:10px;position:relative;cursor:pointer;border:none;transition:background var(--tr)}
-.theme-toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform var(--tr);box-shadow:0 1px 3px rgba(0,0,0,.25)}
-[data-theme="light"] .theme-toggle{background:var(--green)}
-[data-theme="light"] .theme-toggle::after{transform:translateX(16px)}
+.tlbl{font-size:.7rem;color:var(--t3)}
+.ttog{width:36px;height:20px;background:var(--bm);border-radius:10px;position:relative;
+  cursor:pointer;border:none;transition:background var(--tr)}
+.ttog::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;
+  border-radius:50%;background:#fff;transition:transform var(--tr);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+[data-theme="light"] .ttog{background:var(--green)}
+[data-theme="light"] .ttog::after{transform:translateX(16px)}
 
-/* ── EXCHANGE TABS ── */
-.ex-tabs{
-  background:var(--panel);border-bottom:1px solid var(--b);
-  padding:0 20px;display:flex;align-items:center;gap:0;
-}
-.ex-tab{
-  display:flex;align-items:center;gap:7px;
-  height:44px;padding:0 16px;border:none;
-  background:transparent;font-family:var(--fb);font-size:.8rem;font-weight:500;
+/* EXCHANGE TABS */
+.ex-tabs{background:var(--panel);border-bottom:1px solid var(--b);
+  padding:0 20px;display:flex;align-items:center}
+.etab{display:flex;align-items:center;gap:7px;height:44px;padding:0 16px;
+  border:none;background:transparent;font-family:var(--fb);font-size:.8rem;font-weight:500;
   color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;
-  transition:all var(--tr);white-space:nowrap;
-}
-.ex-tab:hover{color:var(--t1)}
-.ex-tab.active{color:var(--t1);border-bottom-color:var(--green)}
-.ex-dot{width:7px;height:7px;border-radius:50%}
-.ex-badge{font-size:.65rem;font-weight:600;padding:1px 6px;border-radius:3px}
-.ex-tab-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+  transition:all var(--tr);white-space:nowrap}
+.etab:hover{color:var(--t1)}
+.etab.active{color:var(--t1);border-bottom-color:var(--green)}
+.edot{width:7px;height:7px;border-radius:50%}
+.ebadge{font-size:.63rem;font-weight:600;padding:1px 6px;border-radius:3px}
+.src-poly  {background:rgba(38,166,154,.15);color:var(--green)}
+.src-kalshi{background:var(--bbg);color:var(--blue)}
+.src-cross {background:var(--pbg);color:var(--purple)}
+.etab-right{margin-left:auto;display:flex;align-items:center;gap:8px}
 
-/* exchange color coding */
-.src-poly   {background:rgba(38,166,154,.15);color:var(--green)}
-.src-azuro  {background:var(--blue-bg);color:var(--blue)}
-.src-cross  {background:var(--purple-bg);color:var(--purple)}
-
-/* ── STATS ── */
+/* STATS */
 .stats{display:grid;grid-template-columns:repeat(6,1fr);background:var(--panel);border-bottom:1px solid var(--b)}
 @media(max-width:900px){.stats{grid-template-columns:repeat(3,1fr)}}
 .stat{padding:12px 18px;border-right:1px solid var(--b);transition:background var(--tr)}
 .stat:last-child{border-right:none}
 .stat:hover{background:var(--hover)}
-.stat-lbl{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:4px}
-.stat-val{font-family:var(--fm);font-size:1.2rem;font-weight:600;color:var(--t1);line-height:1}
-.stat-val.g{color:var(--green)}.stat-val.a{color:var(--amber)}.stat-val.b{color:var(--blue)}.stat-val.p{color:var(--purple)}
-.stat-sub{font-size:.65rem;color:var(--t3);margin-top:3px}
+.slbl{font-size:.64rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:4px}
+.sval{font-family:var(--fm);font-size:1.2rem;font-weight:600;color:var(--t1);line-height:1}
+.sval.g{color:var(--green)}.sval.a{color:var(--amber)}.sval.b{color:var(--blue)}.sval.p{color:var(--purple)}
+.ssub{font-size:.64rem;color:var(--t3);margin-top:3px}
 
-/* ── TOOLBAR ── */
-.toolbar{
-  background:var(--panel);border-bottom:1px solid var(--b);
-  padding:0 20px;display:flex;align-items:center;gap:8px;height:44px;flex-wrap:wrap;
-}
-.tbar-group{display:flex;align-items:center;gap:4px}
-.tdiv{width:1px;height:18px;background:var(--b);margin:0 4px}
-.fbtn{
-  height:28px;padding:0 11px;border:1px solid var(--b);background:transparent;
-  border-radius:var(--radius);font-family:var(--fb);font-size:.73rem;font-weight:500;
-  color:var(--t2);cursor:pointer;transition:all var(--tr);white-space:nowrap;
-}
+/* TOOLBAR */
+.toolbar{background:var(--panel);border-bottom:1px solid var(--b);
+  padding:0 20px;display:flex;align-items:center;gap:8px;height:44px;flex-wrap:wrap}
+.tgrp{display:flex;align-items:center;gap:4px}
+.div{width:1px;height:18px;background:var(--b);margin:0 4px}
+.fbtn{height:28px;padding:0 11px;border:1px solid var(--b);background:transparent;
+  border-radius:var(--r);font-family:var(--fb);font-size:.73rem;font-weight:500;
+  color:var(--t2);cursor:pointer;transition:all var(--tr);white-space:nowrap}
 .fbtn:hover{background:var(--hover);color:var(--t1)}
-.fbtn.on{background:var(--green-bg);border-color:var(--green);color:var(--green)}
-.fee-grp{display:flex;align-items:center;gap:7px}
-.fee-lbl{font-size:.73rem;color:var(--t2);white-space:nowrap}
-.fee-wrap{position:relative}
-.fee-in{
-  width:64px;height:28px;background:var(--input);border:1px solid var(--b);
-  border-radius:var(--radius);font-family:var(--fm);font-size:.78rem;font-weight:500;
+.fbtn.on{background:var(--gbg);border-color:var(--green);color:var(--green)}
+.fgrp{display:flex;align-items:center;gap:7px}
+.flbl{font-size:.73rem;color:var(--t2);white-space:nowrap}
+.fwrap{position:relative}
+.fin{width:64px;height:28px;background:var(--inp);border:1px solid var(--b);
+  border-radius:var(--r);font-family:var(--fm);font-size:.78rem;font-weight:500;
   color:var(--t1);text-align:right;padding:0 20px 0 8px;outline:none;
-  transition:border-color var(--tr);
-}
-.fee-in:focus{border-color:var(--green)}
-.fee-u{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:.68rem;color:var(--t3);pointer-events:none}
-.rbtn{
-  height:28px;padding:0 11px;background:transparent;border:1px solid var(--b);
-  border-radius:var(--radius);font-family:var(--fb);font-size:.73rem;font-weight:500;
-  color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:5px;transition:all var(--tr);
-}
+  transition:border-color var(--tr)}
+.fin:focus{border-color:var(--green)}
+.fu{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:.68rem;color:var(--t3);pointer-events:none}
+.rbtn{height:28px;padding:0 11px;background:transparent;border:1px solid var(--b);
+  border-radius:var(--r);font-family:var(--fb);font-size:.73rem;font-weight:500;
+  color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:5px;transition:all var(--tr)}
 .rbtn:hover{background:var(--hover);color:var(--t1)}
 .rbtn:disabled{opacity:.35;cursor:not-allowed}
 .rbtn svg{width:12px;height:12px}
 .rbtn.spin svg{animation:rot .7s linear infinite}
 @keyframes rot{to{transform:rotate(360deg)}}
-.tb-note{margin-left:auto;font-family:var(--fm);font-size:.7rem;color:var(--t3)}
+.tnote{margin-left:auto;font-family:var(--fm);font-size:.7rem;color:var(--t3)}
 
-/* ── TABLE ── */
+/* INFO BAR */
+.info-bar{background:var(--pbg);border-bottom:1px solid rgba(139,92,246,.2);
+  padding:9px 20px;display:flex;align-items:center;gap:10px;
+  font-size:.72rem;color:var(--t2);line-height:1.5}
+.info-bar strong{color:var(--purple)}
+
+/* TABLE */
 .main{flex:1;overflow-x:auto}
 table{width:100%;border-collapse:collapse;min-width:960px}
 thead{position:sticky;top:96px;z-index:10}
 thead tr{background:var(--panel);border-bottom:2px solid var(--bm)}
-th{
-  padding:9px 14px;text-align:left;font-size:.65rem;font-weight:600;
-  color:var(--t3);text-transform:uppercase;letter-spacing:.07em;
-  cursor:pointer;white-space:nowrap;user-select:none;transition:color var(--tr);
-}
+th{padding:9px 14px;text-align:left;font-size:.64rem;font-weight:600;color:var(--t3);
+  text-transform:uppercase;letter-spacing:.07em;cursor:pointer;white-space:nowrap;
+  user-select:none;transition:color var(--tr)}
 th:hover{color:var(--t1)}
 th.sa{color:var(--t1)}
 th .si{margin-left:3px;opacity:.35;font-size:.6rem}
@@ -152,55 +140,50 @@ tbody tr{border-bottom:1px solid var(--b);transition:background var(--tr)}
 tbody tr:hover{background:var(--hover)}
 td{padding:10px 14px;font-size:.8rem;vertical-align:middle}
 
-.td-num{font-family:var(--fm);font-size:.78rem}
 .td-rank{font-family:var(--fm);font-size:.68rem;color:var(--t3);width:32px;text-align:right}
-.td-mkt{max-width:300px}
-.mkt-q{font-size:.8rem;color:var(--t1);line-height:1.4}
-.mkt-q a{color:inherit;text-decoration:none}
-.mkt-q a:hover{color:var(--green)}
-.mkt-src{display:flex;align-items:center;gap:5px;margin-top:4px}
-.src-tag{font-size:.6rem;font-weight:600;padding:1px 6px;border-radius:3px}
+.td-mkt{max-width:310px}
+.mq{font-size:.8rem;color:var(--t1);line-height:1.4}
+.mq a{color:inherit;text-decoration:none}.mq a:hover{color:var(--green)}
+.msrc{display:flex;align-items:center;gap:5px;margin-top:4px;flex-wrap:wrap}
+.stag{font-size:.6rem;font-weight:600;padding:1px 6px;border-radius:3px}
+.mcat{font-size:.6rem;color:var(--t3)}
 
-/* prices */
-.p-yes {color:var(--green);font-family:var(--fm);font-weight:500}
-.p-no  {color:var(--red);  font-family:var(--fm);font-weight:500}
-.p-cost{color:var(--t2);   font-family:var(--fm)}
+.py{font-family:var(--fm);font-weight:500;color:var(--green)}
+.pn{font-family:var(--fm);font-weight:500;color:var(--red)}
+.pc{font-family:var(--fm);color:var(--t2)}
+.xsrc{font-size:.58rem;color:var(--t3);display:block;margin-top:1px}
 
-/* profit / apy */
-.pp{font-family:var(--fm);font-weight:600;color:var(--green)}
-.pn{font-family:var(--fm);color:var(--t3)}
+.pfp{font-family:var(--fm);font-weight:600;color:var(--green)}
+.pfn{font-family:var(--fm);color:var(--t3)}
+
 .apy{font-family:var(--fm);font-weight:600;font-size:.88rem}
-.ah{color:var(--green)}.am{color:var(--amber)}.al{color:var(--t2)}.az{color:var(--t3)}.an{color:var(--red)}
+.ah{color:var(--green)}.am{color:var(--amber)}.al{color:var(--t2)}.az2{color:var(--t3)}.an{color:var(--red)}
 
-/* cross-exchange special */
-.cross-yes-src,.cross-no-src{font-size:.6rem;color:var(--t3);display:block}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:3px;
+  font-size:.64rem;font-weight:600;white-space:nowrap}
+.ba{background:var(--gbg);color:var(--green)}
+.bm2{background:transparent;color:var(--t3);border:1px solid var(--b)}
+.bc{background:var(--pbg);color:var(--purple)}
 
-/* badge */
-.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:3px;font-size:.65rem;font-weight:600;white-space:nowrap}
-.b-arb {background:var(--green-bg);color:var(--green)}
-.b-miss{background:transparent;color:var(--t3);border:1px solid var(--b)}
-.b-cross{background:var(--purple-bg);color:var(--purple)}
+.ebar{width:56px;height:3px;background:var(--b);border-radius:2px;overflow:hidden}
+.efill{height:100%;border-radius:2px;background:var(--green)}
 
-.edge-bar{width:56px;height:3px;background:var(--b);border-radius:2px;overflow:hidden}
-.edge-fill{height:100%;border-radius:2px;background:var(--green)}
+/* empty/status */
+.tst{text-align:center;padding:72px 24px;color:var(--t3)}
+.tst .icon{font-size:1.4rem;margin-bottom:10px}
+.tst .msg{font-size:.85rem;color:var(--t2);margin-bottom:6px}
+.tst .sub{font-size:.73rem;color:var(--t3);line-height:1.7}
+.sp{display:inline-block;width:13px;height:13px;border:2px solid var(--bm);
+  border-top-color:var(--green);border-radius:50%;animation:rot .7s linear infinite;
+  vertical-align:middle;margin-right:5px}
 
-/* empty / status */
-.tbl-st{text-align:center;padding:72px 24px;color:var(--t3)}
-.tbl-st .icon{font-size:1.4rem;margin-bottom:10px}
-.tbl-st .msg{font-size:.85rem;color:var(--t2);margin-bottom:6px}
-.tbl-st .sub{font-size:.73rem;color:var(--t3);line-height:1.7}
-.spinner{display:inline-block;width:13px;height:13px;border:2px solid var(--bm);border-top-color:var(--green);border-radius:50%;animation:rot .7s linear infinite;vertical-align:middle;margin-right:5px}
+/* exchange load status mini */
+.ex-status{display:flex;align-items:center;gap:16px;padding:6px 20px;
+  background:var(--panel);border-bottom:1px solid var(--b);font-size:.68rem;color:var(--t3)}
+.ex-status-item{display:flex;align-items:center;gap:5px}
+.es-dot{width:6px;height:6px;border-radius:50%}
+.es-ok{background:var(--green)}.es-err{background:var(--red)}.es-load{background:var(--amber);animation:blink 1s infinite}
 
-/* cross-exchange info bar */
-.info-bar{
-  background:var(--purple-bg);border-bottom:1px solid rgba(139,92,246,.2);
-  padding:9px 20px;display:flex;align-items:center;gap:10px;
-  font-size:.72rem;color:var(--t2);
-}
-.info-bar strong{color:var(--purple)}
-.info-bar a{color:var(--purple);text-decoration:none}
-
-/* footer */
 footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;display:flex;gap:20px;flex-wrap:wrap}
 .fi{font-size:.68rem;color:var(--t3);display:flex;gap:5px}
 .fi b{color:var(--t2);font-weight:500}
@@ -212,44 +195,56 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
 <!-- TOPBAR -->
 <header class="topbar">
   <a class="brand" href="#">
-    <div class="brand-mark">
+    <div class="bmark">
       <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round">
         <path d="M3 13L8 3L13 13"/><path d="M5.5 9.5H10.5"/>
       </svg>
     </div>
-    <span class="brand-name">PolyArb</span>
-    <span class="brand-tag">Cross-Exchange Arbitrage</span>
+    <span class="bname">PolyArb</span>
+    <span class="btag">Cross-Exchange Arbitrage</span>
   </a>
   <div class="tb-mid">
-    <div class="pill loading" id="pill">
-      <span class="pill-dot"></span><span id="pill-txt">Connecting</span>
+    <div class="pill load" id="pill">
+      <span class="pdot"></span><span id="pill-txt">Connecting</span>
     </div>
-    <span class="tb-clock" id="clock">—</span>
+    <span class="clock" id="clock">—</span>
   </div>
   <div class="tb-right">
-    <span class="theme-lbl" id="theme-lbl">Dark</span>
-    <button class="theme-toggle" onclick="toggleTheme()"></button>
+    <span class="tlbl" id="tlbl">Dark</span>
+    <button class="ttog" onclick="toggleTheme()"></button>
   </div>
 </header>
 
+<!-- EXCHANGE STATUS BAR -->
+<div class="ex-status">
+  <div class="ex-status-item">
+    <span class="es-dot es-load" id="es-poly"></span>
+    <span id="es-poly-txt">Polymarket: loading…</span>
+  </div>
+  <div class="ex-status-item">
+    <span class="es-dot es-load" id="es-kalshi"></span>
+    <span id="es-kalshi-txt">Kalshi: loading…</span>
+  </div>
+</div>
+
 <!-- EXCHANGE TABS -->
 <div class="ex-tabs">
-  <button class="ex-tab active" id="tab-poly" onclick="setTab('poly')">
-    <span class="ex-dot" style="background:var(--green)"></span>
+  <button class="etab active" id="tab-poly"   onclick="setTab('poly')">
+    <span class="edot" style="background:var(--green)"></span>
     Polymarket
-    <span class="ex-badge src-poly" id="cnt-poly">—</span>
+    <span class="ebadge src-poly" id="cnt-poly">—</span>
   </button>
-  <button class="ex-tab" id="tab-azuro" onclick="setTab('azuro')">
-    <span class="ex-dot" style="background:var(--blue)"></span>
-    Azuro · BNB Chain
-    <span class="ex-badge src-azuro" id="cnt-azuro">—</span>
+  <button class="etab" id="tab-kalshi" onclick="setTab('kalshi')">
+    <span class="edot" style="background:var(--blue)"></span>
+    Kalshi
+    <span class="ebadge src-kalshi" id="cnt-kalshi">—</span>
   </button>
-  <button class="ex-tab" id="tab-cross" onclick="setTab('cross')">
-    <span class="ex-dot" style="background:var(--purple)"></span>
+  <button class="etab" id="tab-cross"  onclick="setTab('cross')">
+    <span class="edot" style="background:var(--purple)"></span>
     Cross-Exchange
-    <span class="ex-badge src-cross" id="cnt-cross">—</span>
+    <span class="ebadge src-cross" id="cnt-cross">—</span>
   </button>
-  <div class="ex-tab-right">
+  <div class="etab-right">
     <button class="rbtn" id="rbtn" onclick="loadAll()">
       <svg id="rsvg" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
         <path d="M10.5 2.5A5 5 0 1 0 11 6.5"/><path d="M10.5 2.5V5.5H7.5"/>
@@ -261,38 +256,38 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
 
 <!-- STATS -->
 <div class="stats">
-  <div class="stat"><div class="stat-lbl">Poly Markets</div><div class="stat-val b" id="s-pm">—</div></div>
-  <div class="stat"><div class="stat-lbl">Azuro Markets</div><div class="stat-val b" id="s-az">—</div></div>
-  <div class="stat"><div class="stat-lbl">Arb Opportunities</div><div class="stat-val g" id="s-arb">—</div></div>
-  <div class="stat"><div class="stat-lbl">Best APY</div><div class="stat-val g" id="s-best">—</div></div>
-  <div class="stat"><div class="stat-lbl">Cross-Exchange Ops</div><div class="stat-val p" id="s-cross">—</div><div class="stat-sub">Poly ↔ Azuro</div></div>
-  <div class="stat"><div class="stat-lbl">Fee per Side</div><div class="stat-val" id="s-fee">2.00%</div></div>
+  <div class="stat"><div class="slbl">Poly Markets</div><div class="sval b" id="s-pm">—</div></div>
+  <div class="stat"><div class="slbl">Kalshi Markets</div><div class="sval b" id="s-km">—</div></div>
+  <div class="stat"><div class="slbl">Arb Opportunities</div><div class="sval g" id="s-arb">—</div></div>
+  <div class="stat"><div class="slbl">Best APY</div><div class="sval g" id="s-best">—</div></div>
+  <div class="stat"><div class="slbl">Cross-Exchange Ops</div><div class="sval p" id="s-cross">—</div><div class="ssub">Poly ↔ Kalshi</div></div>
+  <div class="stat"><div class="slbl">Fee per Side</div><div class="sval" id="s-fee">2.00%</div></div>
 </div>
 
 <!-- TOOLBAR -->
 <div class="toolbar">
-  <div class="tbar-group">
+  <div class="tgrp">
     <button class="fbtn" id="f-all"  onclick="setFilter('all')">All</button>
-    <button class="fbtn on" id="f-arb"  onclick="setFilter('arb')">Arb Only</button>
+    <button class="fbtn on" id="f-arb" onclick="setFilter('arb')">Arb Only</button>
     <button class="fbtn" id="f-near" onclick="setFilter('near')">Near-Miss &lt;1¢</button>
   </div>
-  <div class="tdiv"></div>
-  <div class="fee-grp">
-    <span class="fee-lbl">Taker Fee</span>
-    <div class="fee-wrap">
-      <input type="number" class="fee-in" id="fee" value="2" min="0" max="20" step="0.1">
-      <span class="fee-u">%</span>
+  <div class="div"></div>
+  <div class="fgrp">
+    <span class="flbl">Taker Fee</span>
+    <div class="fwrap">
+      <input type="number" class="fin" id="fee" value="2" min="0" max="20" step="0.1">
+      <span class="fu">%</span>
     </div>
-    <span class="fee-lbl">per side</span>
+    <span class="flbl">per side</span>
   </div>
-  <div class="tb-note" id="tb-note">—</div>
+  <div class="tnote" id="tnote">—</div>
 </div>
 
-<!-- INFO BAR for cross tab -->
+<!-- CROSS INFO BAR -->
 <div class="info-bar" id="info-cross" style="display:none">
-  <strong>⚡ Cross-Exchange Arb:</strong>
-  Buy YES on one platform + NO on another for the <em>same event</em>. If combined cost &lt; $1.00 (after fees) → guaranteed profit.
-  Markets matched by event name similarity.
+  <strong>⚡ Cross-Exchange:</strong>
+  Buy YES on Polymarket + NO on Kalshi (or vice versa) for matched events. If total cost &lt; $1.00 after fees → risk-free profit.
+  Events matched by title similarity.
 </div>
 
 <!-- TABLE -->
@@ -315,145 +310,143 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
       </tr>
     </thead>
     <tbody id="tbody">
-      <tr><td colspan="12"><div class="tbl-st"><div class="msg"><span class="spinner"></span>Loading…</div></div></td></tr>
+      <tr><td colspan="12"><div class="tst"><div class="msg"><span class="sp"></span>Loading exchanges…</div></div></td></tr>
     </tbody>
   </table>
 </div>
 
-<!-- FOOTER -->
 <footer>
-  <div class="fi"><b>Same-Exchange Arb:</b> YES+NO of same market · Cost=(YES+NO)×(1+fee) · Profit=$1−Cost</div>
-  <div class="fi"><b>Cross-Exchange Arb:</b> YES on Poly + NO on Azuro (or reverse) · matched by event title</div>
-  <div class="fi"><b>APY:</b> Profit%×(365/days) · auto-refresh 60s</div>
+  <div class="fi"><b>Same-Exchange:</b> YES+NO same market · Cost=(YES+NO)×(1+fee) · Profit=$1−Cost</div>
+  <div class="fi"><b>Cross-Exchange:</b> YES on Poly + NO on Kalshi · matched by event title similarity</div>
+  <div class="fi"><b>APY:</b> (Profit/Cost)×(365/days) · Polymarket fee≈2% · Kalshi fee≈1%</div>
 </footer>
 
-</div><!-- .app -->
+</div>
 <script>
 // ── STATE ───────────────────────────────────────────────────────────────────
-let polyRaw=[], azuroRaw=[];
-let computed=[], cf='arb', currentTab='poly', _sc='apy', _sd=-1;
-let refreshTimer=null, clockTimer=null;
+let polyRaw=[], kalshiRaw=[];
+let _tabs={poly:[],kalshi:[],cross:[]};
+let cf='arb', currentTab='poly', _sc='apy', _sd=-1;
+let refreshTimer=null;
 
 // ── THEME ───────────────────────────────────────────────────────────────────
 function toggleTheme(){
-  const h=document.documentElement, n=h.dataset.theme==='dark'?'light':'dark';
+  const h=document.documentElement,n=h.dataset.theme==='dark'?'light':'dark';
   h.dataset.theme=n;
-  document.getElementById('theme-lbl').textContent=n==='dark'?'Dark':'Light';
+  document.getElementById('tlbl').textContent=n==='dark'?'Dark':'Light';
   localStorage.setItem('pa-theme',n);
 }
 (()=>{
   const s=localStorage.getItem('pa-theme');
-  if(s){document.documentElement.dataset.theme=s;document.getElementById('theme-lbl').textContent=s==='dark'?'Dark':'Light';}
+  if(s){document.documentElement.dataset.theme=s;document.getElementById('tlbl').textContent=s==='dark'?'Dark':'Light';}
 })();
 
-// ── CLOCK ───────────────────────────────────────────────────────────────────
-function startClock(){
-  function tick(){ document.getElementById('clock').textContent=new Date().toLocaleTimeString(); }
-  tick();
-  clockTimer=setInterval(tick,1000);
-}
-startClock();
+// ── LIVE CLOCK ──────────────────────────────────────────────────────────────
+setInterval(()=>{document.getElementById('clock').textContent=new Date().toLocaleTimeString();},1000);
+document.getElementById('clock').textContent=new Date().toLocaleTimeString();
 
 // ── UTILS ───────────────────────────────────────────────────────────────────
 function getFee(){ return Math.max(0,parseFloat(document.getElementById('fee').value)||0)/100; }
 
-// Smart APY formatter — always shows meaningful precision
 function fmtAPY(v){
   if(v==null)return'—';
-  const s=v>0?'+':'';
-  const a=Math.abs(v);
+  const s=v>0?'+':'';const a=Math.abs(v);
   if(a===0)return'0.000%';
   if(a<0.01) return s+v.toFixed(4)+'%';
   if(a<0.1)  return s+v.toFixed(3)+'%';
   if(a<1)    return s+v.toFixed(2)+'%';
-  if(a<10)   return s+v.toFixed(1)+'%';
-  return s+v.toFixed(0)+'%';
+  if(a<10)   return s+v.toFixed(2)+'%';
+  if(a<100)  return s+v.toFixed(1)+'%';
+  return s+Math.round(v)+'%';
 }
-
 function fmtPct(v){
   if(v==null)return'—';
-  const s=v>0?'+':'';
-  const a=Math.abs(v);
+  const s=v>=0?'+':'';const a=Math.abs(v);
   if(a<0.001)return s+v.toFixed(4)+'%';
   if(a<0.01) return s+v.toFixed(3)+'%';
   return s+v.toFixed(3)+'%';
 }
-
 function fmtVol(v){
   if(!v)return'—';
   if(v>=1e6)return'$'+(v/1e6).toFixed(1)+'M';
   if(v>=1e3)return'$'+(v/1e3).toFixed(0)+'K';
   return'$'+v.toFixed(0);
 }
+function setPill(s,t){const p=document.getElementById('pill');p.className='pill '+s;document.getElementById('pill-txt').textContent=t;}
+function setTbSt(h){document.getElementById('tbody').innerHTML=`<tr><td colspan="12"><div class="tst">${h}</div></td></tr>`;}
 
-function setPill(state,txt){
-  const p=document.getElementById('pill');
-  p.className='pill '+state;
-  document.getElementById('pill-txt').textContent=txt;
-}
-
-function setTbStatus(html){
-  document.getElementById('tbody').innerHTML=`<tr><td colspan="12"><div class="tbl-st">${html}</div></td></tr>`;
+function setExStatus(ex, ok, msg){
+  const dot=document.getElementById('es-'+ex);
+  const txt=document.getElementById('es-'+ex+'-txt');
+  dot.className='es-dot '+(ok===true?'es-ok':ok===false?'es-err':'es-load');
+  txt.textContent=msg;
 }
 
 // ── FETCH ───────────────────────────────────────────────────────────────────
 async function loadAll(){
   const btn=document.getElementById('rbtn');
-  btn.disabled=true;
-  document.getElementById('rsvg').parentElement.classList.add('spin');
-  setPill('loading','Loading');
+  btn.disabled=true;btn.classList.add('spin');
+  setPill('load','Loading');
   if(refreshTimer)clearTimeout(refreshTimer);
 
-  // Fetch both in parallel
-  const [pm, az] = await Promise.allSettled([fetchPolymarket(), fetchAzuro()]);
+  setExStatus('poly',null,'Polymarket: loading…');
+  setExStatus('kalshi',null,'Kalshi: loading…');
 
-  if(pm.status==='fulfilled') polyRaw=pm.value;
-  else console.warn('Polymarket failed:', pm.reason);
+  const [pm,km]=await Promise.allSettled([fetchPoly(),fetchKalshi()]);
 
-  if(az.status==='fulfilled') azuroRaw=az.value;
-  else console.warn('Azuro failed:', az.reason);
-
-  if(!polyRaw.length && !azuroRaw.length){
-    setTbStatus('<div class="icon">⚠</div><div class="msg">Both exchanges failed to load.</div><div class="sub">Check Vercel function logs with <code>vercel logs</code></div>');
-    setPill('error','Error');
+  if(pm.status==='fulfilled'){
+    polyRaw=pm.value;
+    setExStatus('poly',true,`Polymarket: ${polyRaw.length} markets`);
   } else {
-    setPill('live','Live');
-    computeAll();
-    renderTab();
+    setExStatus('poly',false,`Polymarket: ${pm.reason}`);
   }
 
-  btn.disabled=false;
-  document.getElementById('rsvg').parentElement.classList.remove('spin');
+  if(km.status==='fulfilled'){
+    kalshiRaw=km.value;
+    setExStatus('kalshi',true,`Kalshi: ${kalshiRaw.length} markets`);
+  } else {
+    setExStatus('kalshi',false,`Kalshi: ${km.reason}`);
+  }
+
+  if(!polyRaw.length&&!kalshiRaw.length){
+    setTbSt('<div class="icon">⚠</div><div class="msg">Both exchanges failed.</div><div class="sub">Check Vercel logs: <code>vercel logs</code></div>');
+    setPill('error','Error');
+  } else {
+    computeAll();
+    renderTab();
+    setPill('live','Live');
+  }
+
+  btn.disabled=false;btn.classList.remove('spin');
   refreshTimer=setTimeout(loadAll,60000);
 }
 
-async function fetchPolymarket(){
-  const LIMIT=500, MAX=4;
+async function fetchPoly(){
   let all=[];
-  for(let p=0;p<MAX;p++){
-    const r=await fetch(`/api/markets?limit=${LIMIT}&offset=${p*LIMIT}`);
-    if(!r.ok) throw new Error(`Poly HTTP ${r.status}`);
+  for(let p=0;p<4;p++){
+    const r=await fetch(`/api/markets?limit=500&offset=${p*500}`);
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
     const d=await r.json();
-    if(d.error) throw new Error(d.error);
-    if(!Array.isArray(d)||!d.length) break;
+    if(d.error)throw new Error(d.error);
+    if(!Array.isArray(d)||!d.length)break;
     all=all.concat(d);
-    if(d.length<LIMIT) break;
+    if(d.length<500)break;
   }
   return all;
 }
 
-async function fetchAzuro(){
-  const r=await fetch('/api/azuro');
-  if(!r.ok) throw new Error(`Azuro HTTP ${r.status}`);
+async function fetchKalshi(){
+  const r=await fetch('/api/kalshi');
+  if(!r.ok)throw new Error(`HTTP ${r.status}`);
   const d=await r.json();
-  if(d.error) throw new Error(d.error);
-  return Array.isArray(d)?d:[];
+  if(d.error)throw new Error(d.error);
+  if(!Array.isArray(d))throw new Error('Unexpected response');
+  return d;
 }
 
-// ── COMPUTE ─────────────────────────────────────────────────────────────────
-function processMarket(m, source){
-  const f=getFee();
-  const now=Date.now();
+// ── PROCESS ONE MARKET ──────────────────────────────────────────────────────
+function process(m, source){
+  const f=getFee(), now=Date.now();
   let yes=null,no=null;
   try{
     let prices  =typeof m.outcomePrices==='string'?JSON.parse(m.outcomePrices):m.outcomePrices;
@@ -467,123 +460,112 @@ function processMarket(m, source){
   }catch(e){}
   if(!yes||!no||isNaN(yes)||isNaN(no)||yes<=0||no<=0||yes>=1||no>=1)return null;
 
-  const fee=m.feeOverride!==undefined?m.feeOverride:f;
-  const cost=yes*(1+fee)+no*(1+fee);
+  const cost=yes*(1+f)+no*(1+f);
   const profit=1-cost;
   const profitPct=(profit/cost)*100;
   let days=null;
-  if(m.endDate) days=Math.max((new Date(m.endDate)-now)/86400000,0.01);
+  if(m.endDate)days=Math.max((new Date(m.endDate)-now)/86400000,0.01);
   const apy=days?(profit/cost)*(365/days)*100:null;
 
   return{
-    question:m.question||m.shortTitle||'—',slug:m.slug||'',source,
-    yes,no,cost,profit,profitPct,apy,days,
+    question:m.question||'—', slug:m.slug||'',
+    source, yes, no, cost, profit, profitPct, apy, days,
     volume:parseFloat(m.volume||0),
-    isArb:profit>0,isNear:profit<=0&&profit>-0.01,
-    sport:m.sport||null,
+    category:m.category||m.subtitle||'',
+    isArb:profit>0, isNear:profit<=0&&profit>-0.01,
   };
 }
 
-function computeAll(){
-  const polyM = polyRaw.map(m=>processMarket(m,'poly')).filter(Boolean);
-  const azuroM = azuroRaw.map(m=>processMarket(m,'azuro')).filter(Boolean);
-  const crossM = findCrossExchangeArb(polyM, azuroM);
-
-  // store per-tab
-  window._tabs={
-    poly:  polyM,
-    azuro: azuroM,
-    cross: crossM,
-  };
-
-  // update counts
-  document.getElementById('cnt-poly').textContent  = polyM.length;
-  document.getElementById('cnt-azuro').textContent = azuroM.length;
-  document.getElementById('cnt-cross').textContent = crossM.length;
-  document.getElementById('s-pm').textContent      = polyM.length   || '—';
-  document.getElementById('s-az').textContent      = azuroM.length  || '—';
-  document.getElementById('s-fee').textContent     = (getFee()*100).toFixed(2)+'%';
-
-  const allArb=[...polyM,...azuroM,...crossM].filter(r=>r.isArb);
-  document.getElementById('s-arb').textContent  = allArb.length || '—';
-  document.getElementById('s-cross').textContent= crossM.filter(r=>r.isArb).length || '0';
-
-  const best=allArb.length?Math.max(...allArb.filter(r=>r.apy!=null).map(r=>r.apy)):null;
-  document.getElementById('s-best').textContent=best!=null?fmtAPY(best):'—';
-
-  computed=window._tabs[currentTab]||[];
-}
-
-// ── CROSS-EXCHANGE ARB ──────────────────────────────────────────────────────
-// Match Polymarket markets with Azuro markets by event name similarity
+// ── CROSS-EXCHANGE MATCHING ─────────────────────────────────────────────────
 function tokenize(s){
-  return s.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(w=>w.length>2);
+  return s.toLowerCase()
+    .replace(/[^a-z0-9\s]/g,' ')
+    .split(/\s+/)
+    .filter(w=>w.length>2&&!['will','the','for','and','that','this','with','from','are','was','were'].includes(w));
 }
-function similarity(a,b){
+function sim(a,b){
   const ta=new Set(tokenize(a)), tb=new Set(tokenize(b));
   const inter=[...ta].filter(x=>tb.has(x)).length;
-  return inter/Math.max(ta.size,tb.size,1);
+  const union=new Set([...ta,...tb]).size;
+  return union>0?inter/union:0;
 }
 
-function findCrossExchangeArb(polyMs, azuroMs){
-  const f=getFee();
-  const results=[];
+function buildCross(polyMs, kalshiMs){
+  const f=getFee(), now=Date.now();
+  const seen=new Map();
 
   for(const pm of polyMs){
-    for(const az of azuroMs){
-      const sim=similarity(pm.question, az.question);
-      if(sim<0.3) continue; // not similar enough
+    for(const km of kalshiMs){
+      const score=sim(pm.question, km.question);
+      if(score<0.25) continue;
 
-      // Try both combinations:
-      // 1. Buy YES on Poly, NO on Azuro
-      // 2. Buy NO on Poly, YES on Azuro
+      // 4 combos: (poly-yes + kalshi-no), (poly-no + kalshi-yes) × reversed
       const combos=[
-        { yesPrice:pm.yes, noPrice:az.no,  yesEx:'Polymarket', noEx:'Azuro',  yesQ:pm.question, noQ:az.question },
-        { yesPrice:pm.no,  noPrice:az.yes, yesEx:'Polymarket', noEx:'Azuro',  yesQ:pm.question, noQ:az.question },
-        { yesPrice:az.yes, noPrice:pm.no,  yesEx:'Azuro',      noEx:'Poly',   yesQ:az.question, noQ:pm.question },
-        { yesPrice:az.no,  noPrice:pm.yes, yesEx:'Azuro',      noEx:'Poly',   yesQ:az.question, noQ:pm.question },
+        {yp:pm.yes, np:km.no,  ye:'Poly', ne:'Kalshi'},
+        {yp:pm.no,  np:km.yes, ye:'Poly', ne:'Kalshi'},
+        {yp:km.yes, np:pm.no,  ye:'Kalshi',ne:'Poly'},
+        {yp:km.no,  np:pm.yes, ye:'Kalshi',ne:'Poly'},
       ];
 
       for(const c of combos){
-        const cost=c.yesPrice*(1+f)+c.noPrice*(1+f);
+        const cost=c.yp*(1+f)+c.np*(1+f);
         const profit=1-cost;
         const profitPct=(profit/cost)*100;
-        const days=pm.days||az.days||null;
+        const days=pm.days||km.days||null;
         const apy=days?(profit/cost)*(365/days)*100:null;
 
-        results.push({
-          question:`${pm.question}`,
-          matchedWith:az.question,
-          similarity:sim,
-          yesEx:c.yesEx, noEx:c.noEx,
-          yes:c.yesPrice, no:c.noPrice,
-          cost, profit, profitPct, apy, days,
-          volume:Math.max(pm.volume||0,az.volume||0),
-          source:'cross',
-          isArb:profit>0,isNear:profit<=0&&profit>-0.01,
-          slug:pm.slug||az.slug||'',
-        });
+        const key=`${pm.question}|||${km.question}`;
+        const existing=seen.get(key);
+        if(!existing||existing.profit<profit){
+          seen.set(key,{
+            question:pm.question,
+            matchedQ:km.question,
+            similarity:score,
+            yesEx:c.ye, noEx:c.ne,
+            yes:c.yp, no:c.np,
+            cost, profit, profitPct, apy, days,
+            volume:Math.max(pm.volume||0,km.volume||0),
+            source:'cross',
+            slug:pm.slug||km.slug||'',
+            isArb:profit>0,
+            isNear:profit<=0&&profit>-0.01,
+          });
+        }
       }
     }
   }
 
-  // deduplicate — keep best profit per question pair
-  const seen=new Map();
-  for(const r of results){
-    const key=r.question+'|'+r.matchedWith;
-    if(!seen.has(key)||seen.get(key).profit<r.profit) seen.set(key,r);
-  }
   return [...seen.values()].sort((a,b)=>(b.apy||0)-(a.apy||0));
 }
 
+// ── COMPUTE ALL ─────────────────────────────────────────────────────────────
+function computeAll(){
+  const pm=polyRaw.map(m=>process(m,'poly')).filter(Boolean);
+  const km=kalshiRaw.map(m=>process(m,'kalshi')).filter(Boolean);
+  const cx=buildCross(pm,km);
+
+  _tabs={poly:pm, kalshi:km, cross:cx};
+
+  document.getElementById('cnt-poly').textContent  =pm.length;
+  document.getElementById('cnt-kalshi').textContent=km.length;
+  document.getElementById('cnt-cross').textContent =cx.length;
+  document.getElementById('s-pm').textContent  =pm.length||'—';
+  document.getElementById('s-km').textContent  =km.length||'—';
+  document.getElementById('s-fee').textContent =(getFee()*100).toFixed(2)+'%';
+
+  const allArb=[...pm,...km,...cx].filter(r=>r.isArb);
+  document.getElementById('s-arb').textContent  =allArb.length||'—';
+  document.getElementById('s-cross').textContent=cx.filter(r=>r.isArb).length||'0';
+
+  const best=allArb.length?Math.max(...allArb.filter(r=>r.apy!=null).map(r=>r.apy)):null;
+  document.getElementById('s-best').textContent=best!=null?fmtAPY(best):'—';
+}
+
 // ── TAB ─────────────────────────────────────────────────────────────────────
-function setTab(tab){
-  currentTab=tab;
-  ['poly','azuro','cross'].forEach(t=>{
-    document.getElementById('tab-'+t).classList.toggle('active',t===tab);
-  });
-  document.getElementById('info-cross').style.display=tab==='cross'?'flex':'none';
-  computed=window._tabs?window._tabs[tab]||[]:[];
+function setTab(t){
+  currentTab=t;
+  ['poly','kalshi','cross'].forEach(k=>document.getElementById('tab-'+k).classList.toggle('active',k===t));
+  document.getElementById('info-cross').style.display=t==='cross'?'flex':'none';
   render();
 }
 
@@ -593,9 +575,8 @@ function setFilter(f){
   ['all','arb','near'].forEach(k=>document.getElementById('f-'+k).classList.toggle('on',k===f));
   render();
 }
-
 function sortBy(col){
-  if(_sc===col)_sd*=-1; else{_sc=col;_sd=-1;}
+  if(_sc===col)_sd*=-1;else{_sc=col;_sd=-1;}
   document.querySelectorAll('thead th').forEach(th=>{
     th.classList.remove('sa');
     const si=th.querySelector('.si');if(si)si.textContent='↕';
@@ -607,75 +588,81 @@ function sortBy(col){
 
 // ── RENDER ───────────────────────────────────────────────────────────────────
 function render(){
-  let rows=computed||[];
+  let rows=(_tabs[currentTab]||[]).slice();
   if(cf==='arb')  rows=rows.filter(r=>r.isArb);
   if(cf==='near') rows=rows.filter(r=>r.isNear);
-  rows=[...rows].sort((a,b)=>{
+  rows.sort((a,b)=>{
     let av=a[_sc],bv=b[_sc];
     if(av==null&&bv==null)return 0;if(av==null)return 1;if(bv==null)return -1;
     if(typeof av==='string')return av.localeCompare(bv)*_sd;
     return(av-bv)*_sd;
   });
 
-  const total=computed.length;
-  const nArb=computed.filter(r=>r.isArb).length;
-  const nNear=computed.filter(r=>r.isNear).length;
-  const labels={all:`${total} markets`,arb:`${nArb} arb opps`,near:`${nNear} near-miss`};
-  document.getElementById('tb-note').textContent=labels[cf];
+  const all=_tabs[currentTab]||[];
+  const labels={
+    all:`${all.length} markets`,
+    arb:`${all.filter(r=>r.isArb).length} arb opportunities`,
+    near:`${all.filter(r=>r.isNear).length} near-miss`,
+  };
+  document.getElementById('tnote').textContent=labels[cf];
 
-  const tbody=document.getElementById('tbody');
   if(!rows.length){
-    setTbStatus('<div class="msg">No markets match this filter.</div>');
+    setTbSt('<div class="msg">No markets match this filter.</div>');
     return;
   }
 
+  const tbody=document.getElementById('tbody');
   tbody.innerHTML=rows.map((r,i)=>{
-    const ac=!r.apy?'az':r.apy>50?'ah':r.apy>10?'am':r.apy>0?'al':'an';
-    const pCls=r.profit>=0?'pp':'pn';
+    const ac=!r.apy?'az2':r.apy>50?'ah':r.apy>10?'am':r.apy>0?'al':'an';
+    const pCls=r.profit>=0?'pfp':'pfn';
     const ps=r.profit>=0?'+':'';
-    const ep=r.isArb?Math.min(100,r.profitPct*10):0;
+    const ep=r.isArb?Math.min(100,Math.abs(r.profitPct)*10):0;
     const link=r.slug?`https://polymarket.com/event/${r.slug}`:'#';
 
-    let srcTag='';
-    if(r.source==='poly')   srcTag=`<span class="src-tag src-poly">Polymarket</span>`;
-    if(r.source==='azuro')  srcTag=`<span class="src-tag src-azuro">Azuro · BNB</span>`;
-    if(r.source==='cross')  srcTag=`<span class="src-tag src-cross">↔ Cross-Exchange</span>`;
+    // source tag
+    const stag = r.source==='poly'
+      ?`<span class="stag src-poly">Polymarket</span>`
+      :r.source==='kalshi'
+      ?`<span class="stag src-kalshi">Kalshi</span>`
+      :`<span class="stag src-cross">↔ Cross</span>`;
 
-    let badge='';
-    if(r.source==='cross'&&r.isArb) badge=`<span class="badge b-cross">✓ Cross Arb</span>`;
-    else if(r.isArb) badge=`<span class="badge b-arb">✓ Arb</span>`;
-    else badge=`<span class="badge b-miss">${(r.profit*100).toFixed(2)}¢ miss</span>`;
+    // badge
+    const badge = r.source==='cross'&&r.isArb
+      ?`<span class="badge bc">✓ Cross Arb</span>`
+      :r.isArb
+      ?`<span class="badge ba">✓ Arb</span>`
+      :`<span class="badge bm2">${(r.profit*100).toFixed(2)}¢ miss</span>`;
 
-    let yesCell=`<td class="r p-yes">${(r.yes*100).toFixed(1)}¢`;
-    let noCell =`<td class="r p-no">${(r.no*100).toFixed(1)}¢`;
-    if(r.source==='cross'){
-      yesCell=`<td class="r p-yes">${(r.yes*100).toFixed(1)}¢<span class="cross-yes-src">${r.yesEx}</span>`;
-      noCell =`<td class="r p-no">${(r.no*100).toFixed(1)}¢<span class="cross-no-src">${r.noEx}</span>`;
-    }
+    // YES/NO cells — cross shows exchange source
+    const yCell = r.source==='cross'
+      ?`<td class="r py">${(r.yes*100).toFixed(1)}¢<span class="xsrc">${r.yesEx}</span></td>`
+      :`<td class="r py">${(r.yes*100).toFixed(1)}¢</td>`;
+    const nCell = r.source==='cross'
+      ?`<td class="r pn">${(r.no*100).toFixed(1)}¢<span class="xsrc">${r.noEx}</span></td>`
+      :`<td class="r pn">${(r.no*100).toFixed(1)}¢</td>`;
 
     return`<tr>
       <td class="td-rank">${i+1}</td>
       <td class="td-mkt">
-        <div class="mkt-q"><a href="${link}" target="_blank" rel="noopener">${r.question}</a></div>
-        <div class="mkt-src">${srcTag}${r.sport?`<span style="font-size:.6rem;color:var(--t3)">${r.sport}</span>`:''}</div>
+        <div class="mq"><a href="${link}" target="_blank" rel="noopener">${r.question}</a></div>
+        <div class="msrc">${stag}${r.category?`<span class="mcat">${r.category}</span>`:''}</div>
       </td>
-      ${yesCell}</td>
-      ${noCell}</td>
-      <td class="r p-cost">${(r.cost*100).toFixed(2)}¢</td>
+      ${yCell}
+      ${nCell}
+      <td class="r pc">${(r.cost*100).toFixed(2)}¢</td>
       <td class="r ${pCls}">${ps}${(r.profit*100).toFixed(3)}¢</td>
       <td class="r ${pCls}">${fmtPct(r.profitPct)}</td>
       <td class="r apy ${ac}">${fmtAPY(r.apy)}</td>
       <td class="r" style="font-family:var(--fm);font-size:.75rem;color:var(--t2)">${r.days!=null?r.days.toFixed(0)+'d':'—'}</td>
       <td class="r" style="font-family:var(--fm);font-size:.75rem;color:var(--blue)">${fmtVol(r.volume)}</td>
       <td>${badge}</td>
-      <td><div class="edge-bar"><div class="edge-fill" style="width:${ep}%"></div></div></td>
+      <td><div class="ebar"><div class="efill" style="width:${ep}%"></div></div></td>
     </tr>`;
   }).join('');
 }
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
-document.getElementById('fee').addEventListener('input',()=>{computeAll();renderTab();});
-function renderTab(){computed=window._tabs?window._tabs[currentTab]||[]:[];render();}
+document.getElementById('fee').addEventListener('input',()=>{computeAll();render();});
 loadAll();
 </script>
 </body>
