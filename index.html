@@ -189,6 +189,20 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
 .fi b{color:var(--t2);font-weight:500}
 
 .src-pi{background:rgba(245,158,11,.12);color:var(--amber)}
+
+/* Cross-platform dual question display */
+.cross-questions{display:flex;flex-direction:column;gap:3px}
+.cross-q{display:flex;align-items:flex-start;gap:6px;font-size:.78rem}
+.cross-q-lbl{flex-shrink:0;font-size:.62rem;font-weight:600;padding:1px 5px;border-radius:3px;margin-top:1px}
+.cq-poly{background:var(--gbg);color:var(--green)}
+.cq-pi{background:rgba(245,158,11,.12);color:var(--amber)}
+.cross-q a{color:var(--t1);text-decoration:none}
+.cross-q a:hover{color:var(--green);text-decoration:underline}
+.sim-badge{display:inline-flex;align-items:center;gap:3px;font-size:.6rem;font-weight:600;
+  padding:1px 5px;border-radius:3px;margin-left:4px}
+.sim-hi{background:rgba(38,166,154,.15);color:var(--green)}
+.sim-mid{background:rgba(245,158,11,.12);color:var(--amber)}
+.verify-warn{font-size:.62rem;color:var(--amber);margin-top:2px;display:flex;align-items:center;gap:3px}
 </style>
 </head>
 <body>
@@ -281,9 +295,10 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
 </div>
 
 <div class="info-bar" id="info-cross" style="display:none">
-  <strong>↔ Cross-Platform:</strong>
-  Buy YES on one platform + NO on the other for the same event. If combined cost &lt; $1.00 → risk-free profit.
-  <em>Note: PredictIt charges an additional 10% fee on profits. Factor this in before trading.</em>
+  <strong>⚠ Verify Resolution Before Trading:</strong>
+  Both questions are shown for every match. Only trade if they resolve on the <em>exact same outcome, definition, and timing</em>.
+  Title similarity alone is not enough — platforms may use different sources or resolution criteria.
+  PredictIt also charges a <strong>10% fee on profits</strong>.
 </div>
 
 <div class="main">
@@ -480,27 +495,46 @@ function process(m, source){
 }
 
 // ── CROSS-EXCHANGE MATCHING ─────────────────────────────────────────────────
+const STOP=new Set(['will','the','for','and','that','this','with','from','are','was','were','who','what','when','how','does','did','has','have','its','not','you','they','their','been','would','could','should','more','than','over','under','into']);
 function tokenize(s){
-  return s.toLowerCase()
-    .replace(/[^a-z0-9\s]/g,' ')
-    .split(/\s+/)
-    .filter(w=>w.length>2&&!['will','the','for','and','that','this','with','from','are','was','were','who','what','when'].includes(w));
+  return s.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w=>w.length>2&&!STOP.has(w));
 }
-function sim(a,b){
-  const ta=new Set(tokenize(a)), tb=new Set(tokenize(b));
-  const inter=[...ta].filter(x=>tb.has(x)).length;
-  const union=new Set([...ta,...tb]).size;
-  return union>0?inter/union:0;
+
+// Build inverted index: token → Set of market indices
+function buildIndex(markets){
+  const idx=new Map();
+  markets.forEach((m,i)=>{
+    m._tokens=new Set(tokenize(m.question));
+    m._tokens.forEach(t=>{ if(!idx.has(t))idx.set(t,new Set()); idx.get(t).add(i); });
+  });
+  return idx;
 }
 
 function buildCross(polyMs, piMs){
-  const f=getFee(), now=Date.now();
+  const f=getFee();
   const seen=new Map();
 
-  for(const pm of polyMs){
-    for(const pi of piMs){
-      const score=sim(pm.question, pi.question);
-      if(score<0.20) continue;
+  // Pre-limit: only top 500 Poly by volume, all PredictIt (small)
+  const pTop=polyMs.slice().sort((a,b)=>(b.volume||0)-(a.volume||0)).slice(0,500);
+
+  // Build inverted index on PredictIt (smaller set)
+  buildIndex(piMs);
+  const piIdx=buildIndex(piMs);
+
+  // Pre-tokenize poly
+  pTop.forEach(m=>{ if(!m._tokens)m._tokens=new Set(tokenize(m.question)); });
+
+  for(const pm of pTop){
+    // Find candidate PI markets via shared tokens (inverted index lookup)
+    const candidates=new Set();
+    pm._tokens.forEach(t=>{ if(piIdx.has(t))piIdx.get(t).forEach(i=>candidates.add(i)); });
+
+    for(const ci of candidates){
+      const pi=piMs[ci];
+      const inter=[...pm._tokens].filter(x=>pi._tokens.has(x)).length;
+      const union=new Set([...pm._tokens,...pi._tokens]).size;
+      const score=union>0?inter/union:0;
+      if(score<0.40) continue; // high threshold — only show near-certain resolution matches
 
       const combos=[
         {yp:pm.yes, np:pi.no,  ye:'Polymarket', ne:'PredictIt'},
@@ -538,7 +572,8 @@ function buildCross(polyMs, piMs){
     }
   }
 
-  return [...seen.values()].sort((a,b)=>(b.apy||0)-(a.apy||0));
+  // Sort by APY desc, cap at 200 for performance
+  return [...seen.values()].sort((a,b)=>(b.apy||0)-(a.apy||0)).slice(0,200);
 }
 
 // ── COMPUTE ALL ─────────────────────────────────────────────────────────────
@@ -647,8 +682,25 @@ function render(){
     return`<tr>
       <td class="td-rank">${i+1}</td>
       <td class="td-mkt">
+        ${r.source==='cross' ? `
+        <div class="cross-questions">
+          <div class="cross-q">
+            <span class="cross-q-lbl cq-poly">Polymarket</span>
+            <a href="${r.slug?`https://polymarket.com/event/${r.slug}`:'#'}" target="_blank" rel="noopener">${r.question}</a>
+          </div>
+          <div class="cross-q">
+            <span class="cross-q-lbl cq-pi">PredictIt</span>
+            <a href="${r.predictitUrl||'#'}" target="_blank" rel="noopener">${r.matchedQ||'—'}</a>
+          </div>
+          <div class="verify-warn">
+            ⚠ Verify resolution rules match before trading
+            <span class="sim-badge ${(r.similarity||0)>=0.6?'sim-hi':'sim-mid'}">${Math.round((r.similarity||0)*100)}% match</span>
+          </div>
+        </div>
+        ` : `
         <div class="mq"><a href="${link}" target="_blank" rel="noopener">${r.question}</a></div>
         <div class="msrc">${stag}${r.category?`<span class="mcat">${r.category}</span>`:''}</div>
+        `}
       </td>
       ${yCell}
       ${nCell}

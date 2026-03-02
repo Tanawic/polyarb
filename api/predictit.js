@@ -26,34 +26,34 @@ export default async function handler(req, res) {
       if (!Array.isArray(market.contracts)) continue;
       const openContracts = market.contracts.filter(c => c.status === 'Open');
 
-      for (const contract of openContracts) {
+      // IMPORTANT: Only use markets with exactly 1 open contract (true binary YES/NO).
+      // Multi-outcome markets (e.g. "Who wins?" with Republican/Democrat/Other contracts)
+      // have a different resolution structure — NO does NOT mean "everything else fails".
+      // Using NO from a multi-contract market in cross-arb would create FAKE arb signals.
+      if (openContracts.length !== 1) continue;
+      const contract = openContracts[0];
         const yesAsk = contract.bestBuyYesCost;  // price to buy YES
         const noAsk  = contract.bestBuyNoCost;   // price to buy NO
 
         if (!yesAsk || !noAsk || yesAsk <= 0 || noAsk <= 0) continue;
         if (yesAsk >= 1 || noAsk >= 1) continue;
 
-        // PredictIt: question = market name if binary, else "market: contract"
-        const isBinary = openContracts.length === 1;
-        const question = isBinary
-          ? market.name
-          : `${market.name} — ${contract.name}`;
+        const question = market.name; // always binary now
 
         out.push({
           id:            String(contract.id),
           question,
-          slug:          String(market.id),           // used to build URL
+          slug:          String(market.id),
           outcomePrices: JSON.stringify([yesAsk.toFixed(4), noAsk.toFixed(4)]),
           outcomes:      JSON.stringify(['Yes', 'No']),
           endDate:       contract.dateEnd || market.end || null,
-          volume:        0, // PredictIt doesn't expose volume in this endpoint
+          volume:        0,
           source:        'predictit',
           category:      'Politics',
-          fee:           0.10,  // PredictIt 10% profit fee (for display info)
+          isBinaryMarket: true,
           predictitUrl:  market.url || `https://www.predictit.org/markets/detail/${market.id}`,
         });
       }
-    }
 
     res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60');
     return res.status(200).json(out);
