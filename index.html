@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PolyArb — Cross-Exchange Arbitrage</title>
+<title>PolyArb — Order Book Arbitrage</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -73,7 +73,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
 .edot{width:7px;height:7px;border-radius:50%}
 .ebadge{font-size:.63rem;font-weight:600;padding:1px 6px;border-radius:3px}
 .src-poly  {background:rgba(38,166,154,.15);color:var(--green)}
-.src-kalshi{background:var(--bbg);color:var(--blue)}
+.src-clob{background:var(--bbg);color:var(--blue)}
 .src-cross {background:var(--pbg);color:var(--purple)}
 .etab-right{margin-left:auto;display:flex;align-items:center;gap:8px}
 
@@ -201,7 +201,7 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
       </svg>
     </div>
     <span class="bname">PolyArb</span>
-    <span class="btag">Cross-Exchange Arbitrage</span>
+    <span class="btag">Order Book Arbitrage</span>
   </a>
   <div class="tb-mid">
     <div class="pill load" id="pill">
@@ -219,29 +219,29 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
 <div class="ex-status">
   <div class="ex-status-item">
     <span class="es-dot es-load" id="es-poly"></span>
-    <span id="es-poly-txt">Polymarket: loading…</span>
+    <span id="es-poly-txt">Polymarket Gamma: loading…</span>
   </div>
   <div class="ex-status-item">
-    <span class="es-dot es-load" id="es-kalshi"></span>
-    <span id="es-kalshi-txt">Kalshi: loading…</span>
+    <span class="es-dot es-load" id="es-clob"></span>
+    <span id="es-clob-txt">Polymarket CLOB: loading…</span>
   </div>
 </div>
 
 <!-- EXCHANGE TABS -->
 <div class="ex-tabs">
-  <button class="etab active" id="tab-poly"   onclick="setTab('poly')">
+  <button class="etab active" id="tab-poly" onclick="setTab('poly')">
     <span class="edot" style="background:var(--green)"></span>
-    Polymarket
+    Gamma (Last Trade)
     <span class="ebadge src-poly" id="cnt-poly">—</span>
   </button>
-  <button class="etab" id="tab-kalshi" onclick="setTab('kalshi')">
+  <button class="etab" id="tab-clob" onclick="setTab('clob')">
     <span class="edot" style="background:var(--blue)"></span>
-    Kalshi
-    <span class="ebadge src-kalshi" id="cnt-kalshi">—</span>
+    CLOB (Live Ask)
+    <span class="ebadge src-clob" id="cnt-clob">—</span>
   </button>
-  <button class="etab" id="tab-cross"  onclick="setTab('cross')">
+  <button class="etab" id="tab-cross" onclick="setTab('cross')">
     <span class="edot" style="background:var(--purple)"></span>
-    Cross-Exchange
+    Gamma vs CLOB
     <span class="ebadge src-cross" id="cnt-cross">—</span>
   </button>
   <div class="etab-right">
@@ -256,11 +256,11 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
 
 <!-- STATS -->
 <div class="stats">
-  <div class="stat"><div class="slbl">Poly Markets</div><div class="sval b" id="s-pm">—</div></div>
-  <div class="stat"><div class="slbl">Kalshi Markets</div><div class="sval b" id="s-om">—</div></div>
+  <div class="stat"><div class="slbl">Gamma Markets</div><div class="sval b" id="s-pm">—</div></div>
+  <div class="stat"><div class="slbl">CLOB Markets</div><div class="sval b" id="s-clob-m">—</div></div>
   <div class="stat"><div class="slbl">Arb Opportunities</div><div class="sval g" id="s-arb">—</div></div>
   <div class="stat"><div class="slbl">Best APY</div><div class="sval g" id="s-best">—</div></div>
-  <div class="stat"><div class="slbl">Cross-Exchange Ops</div><div class="sval p" id="s-cross">—</div><div class="ssub">Poly ↔ Kalshi</div></div>
+  <div class="stat"><div class="slbl">CLOB Arb Ops</div><div class="sval p" id="s-cross">—</div><div class="ssub">Gamma ↔ CLOB</div></div>
   <div class="stat"><div class="slbl">Fee per Side</div><div class="sval" id="s-fee">2.00%</div></div>
 </div>
 
@@ -283,19 +283,11 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
   <div class="tnote" id="tnote">—</div>
 </div>
 
-<!-- CROSS INFO BAR -->
+<!-- CLOB INFO BAR -->
 <div class="info-bar" id="info-cross" style="display:none">
-  <strong>⚡ Cross-Exchange:</strong>
-  Buy YES on Polymarket + NO on Kalshi (or vice versa) for matched events. If total cost &lt; $1.00 after fees → risk-free profit.
-  Events matched by title similarity.
-</div>
-
-
-<!-- KALSHI API KEY NOTICE -->
-<div class="info-bar" id="info-apikey" style="background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.2)">
-  <strong style="color:var(--amber)">⚙ Kalshi API Key Required:</strong>
-  Get a free key at <a href="https://docs.google.com/forms/d/1h7gp8UffZeXzYQ-lv4jcou9PoRNOqMAQhyW4IwZDnII" target="_blank" style="color:var(--amber)">kalshi.trade API form</a>,
-  then add it in Vercel: <strong style="color:var(--amber)">Settings → Environment Variables → KALSHI_API_KEY</strong> → Redeploy.
+  <strong>⚡ Gamma vs CLOB:</strong>
+  Gamma shows <em>last-trade prices</em> (lagged). CLOB shows <em>live ask prices</em> (what you actually pay).
+  If CLOB YES ask + CLOB NO ask &lt; $1.00 after fees → executable arb on Polymarket itself, no second account needed.
 </div>
 
 <!-- TABLE -->
@@ -318,22 +310,22 @@ footer{background:var(--panel);border-top:1px solid var(--b);padding:12px 20px;d
       </tr>
     </thead>
     <tbody id="tbody">
-      <tr><td colspan="12"><div class="tst"><div class="msg"><span class="sp"></span>Loading exchanges…</div></div></td></tr>
+      <tr><td colspan="12"><div class="tst"><div class="msg"><span class="sp"></span>Loading…</div></div></td></tr>
     </tbody>
   </table>
 </div>
 
 <footer>
-  <div class="fi"><b>Same-Exchange:</b> YES+NO same market · Cost=(YES+NO)×(1+fee) · Profit=$1−Cost</div>
-  <div class="fi"><b>Cross-Exchange:</b> YES on Poly + NO on Kalshi · matched by event title similarity</div>
-  <div class="fi"><b>APY:</b> (Profit/Cost)×(365/days) · Polymarket fee≈2% · Kalshi fee≈1%</div>
+  <div class="fi"><b>Same-Exchange (Gamma):</b> YES+NO last-trade prices · Cost=(YES+NO)×(1+fee)</div>
+  <div class="fi"><b>CLOB Arb:</b> Live orderbook ask prices · If YES_ask+NO_ask &lt; $1.00 → buy both on Polymarket now</div>
+  <div class="fi"><b>APY:</b> (Profit/Cost)×(365/days) · No login or KYC needed · auto-refresh 60s</div>
 </footer>
 
 </div>
 <script>
 // ── STATE ───────────────────────────────────────────────────────────────────
-let polyRaw=[], kalshiRaw=[];
-let _tabs={poly:[],kalshi:[],cross:[]};
+let polyRaw=[], clobRaw=[];
+let _tabs={poly:[],clob:[],cross:[]};
 let cf='arb', currentTab='poly', _sc='apy', _sd=-1;
 let refreshTimer=null;
 
@@ -398,9 +390,9 @@ async function loadAll(){
   if(refreshTimer)clearTimeout(refreshTimer);
 
   setExStatus('poly',null,'Polymarket: loading…');
-  setExStatus('kalshi',null,'Kalshi: loading…');
+  setExStatus('clob',null,'CLOB: loading…');
 
-  const [pm,km]=await Promise.allSettled([fetchPoly(),fetchKalshi()]);
+  const [pm,km]=await Promise.allSettled([fetchPoly(),fetchClob()]);
 
   if(pm.status==='fulfilled'){
     polyRaw=pm.value;
@@ -410,13 +402,13 @@ async function loadAll(){
   }
 
   if(km.status==='fulfilled'){
-    kalshiRaw=km.value;
-    setExStatus('kalshi',true,`Kalshi: ${kalshiRaw.length} markets`);
+    clobRaw=km.value;
+    setExStatus('clob',true,`CLOB: ${clobRaw.length} markets`);
   } else {
-    setExStatus('kalshi',false,`Kalshi: ${km.reason?.message||km.reason}`);
+    setExStatus('clob',false,`CLOB: ${km.reason?.message||km.reason}`);
   }
 
-  if(!polyRaw.length&&!kalshiRaw.length){
+  if(!polyRaw.length&&!clobRaw.length){
     setTbSt('<div class="icon">⚠</div><div class="msg">Both exchanges failed.</div><div class="sub">Check Vercel logs: <code>vercel logs</code></div>');
     setPill('error','Error');
   } else {
@@ -443,8 +435,8 @@ async function fetchPoly(){
   return all;
 }
 
-async function fetchKalshi(){
-  const r=await fetch('/api/kalshi');
+async function fetchClob(){
+  const r=await fetch('/api/clob');
   const d=await r.json();
   if(d.error)throw new Error(d.error); // surfaces the full error string from proxy
   if(!r.ok)throw new Error(`HTTP ${r.status}`);
@@ -498,21 +490,21 @@ function sim(a,b){
   return union>0?inter/union:0;
 }
 
-function buildCross(polyMs, kalshiMs){
+function buildCross(polyMs, clobMs){
   const f=getFee(), now=Date.now();
   const seen=new Map();
 
   for(const pm of polyMs){
-    for(const km of kalshiMs){
+    for(const km of clobMs){
       const score=sim(pm.question, km.question);
       if(score<0.25) continue;
 
       // 4 combos: (poly-yes + kalshi-no), (poly-no + kalshi-yes) × reversed
       const combos=[
-        {yp:pm.yes, np:km.no,  ye:'Poly', ne:'Kalshi'},
-        {yp:pm.no,  np:km.yes, ye:'Poly', ne:'Kalshi'},
-        {yp:km.yes, np:pm.no,  ye:'Kalshi',ne:'Poly'},
-        {yp:km.no,  np:pm.yes, ye:'Kalshi',ne:'Poly'},
+        {yp:pm.yes, np:km.no,  ye:'Gamma', ne:'CLOB'},
+        {yp:pm.no,  np:km.yes, ye:'Gamma', ne:'CLOB'},
+        {yp:km.yes, np:pm.no,  ye:'CLOB',ne:'Gamma'},
+        {yp:km.no,  np:pm.yes, ye:'CLOB',ne:'Gamma'},
       ];
 
       for(const c of combos){
@@ -549,16 +541,16 @@ function buildCross(polyMs, kalshiMs){
 // ── COMPUTE ALL ─────────────────────────────────────────────────────────────
 function computeAll(){
   const pm=polyRaw.map(m=>process(m,'poly')).filter(Boolean);
-  const km=kalshiRaw.map(m=>process(m,'kalshi')).filter(Boolean);
+  const km=clobRaw.map(m=>process(m,'clob')).filter(Boolean);
   const cx=buildCross(pm,km);
 
-  _tabs={poly:pm, kalshi:km, cross:cx};
+  _tabs={poly:pm, clob:km, cross:cx};
 
   document.getElementById('cnt-poly').textContent  =pm.length;
-  document.getElementById('cnt-kalshi').textContent=km.length;
+  document.getElementById('cnt-clob').textContent=km.length;
   document.getElementById('cnt-cross').textContent =cx.length;
   document.getElementById('s-pm').textContent  =pm.length||'—';
-  document.getElementById('s-om').textContent  =km.length||'—';
+  document.getElementById('s-clob-m').textContent  =km.length||'—';
   document.getElementById('s-fee').textContent =(getFee()*100).toFixed(2)+'%';
 
   const allArb=[...pm,...km,...cx].filter(r=>r.isArb);
@@ -572,7 +564,7 @@ function computeAll(){
 // ── TAB ─────────────────────────────────────────────────────────────────────
 function setTab(t){
   currentTab=t;
-  ['poly','kalshi','cross'].forEach(k=>document.getElementById('tab-'+k).classList.toggle('active',k===t));
+  ['poly','clob','cross'].forEach(k=>document.getElementById('tab-'+k).classList.toggle('active',k===t));
   document.getElementById('info-cross').style.display=t==='cross'?'flex':'none';
   render();
 }
@@ -625,13 +617,13 @@ function render(){
     const pCls=r.profit>=0?'pfp':'pfn';
     const ps=r.profit>=0?'+':'';
     const ep=r.isArb?Math.min(100,Math.abs(r.profitPct)*10):0;
-    const link=r.kalshiUrl||(r.slug?`https://polymarket.com/event/${r.slug}`:'#');
+    const link=r.clobUrl||(r.slug?`https://polymarket.com/event/${r.slug}`:'#');
 
     // source tag
     const stag = r.source==='poly'
       ?`<span class="stag src-poly">Polymarket</span>`
-      :r.source==='kalshi'
-      ?`<span class="stag src-kalshi">Kalshi</span>`
+      :r.source==='clob'
+      ?`<span class="stag src-clob">CLOB</span>`
       :`<span class="stag src-cross">↔ Cross</span>`;
 
     // badge
